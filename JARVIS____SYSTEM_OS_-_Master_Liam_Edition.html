@@ -1,0 +1,2505 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>JARVIS // SYSTEM OS — Master Liam Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Orbitron"', 'sans-serif'],
+            body: ['"Rajdhani"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            obsidian: '#02040a',
+            hudPanel: '#060b16',
+            hudCard: '#0a1224',
+            arcCyan: '#00f0ff',
+            arcBlue: '#0077ff',
+            arcGold: '#ffd700',
+            arcCrimson: '#ff2a5f',
+            arcEmerald: '#00ff9d',
+            arcViolet: '#a855f7',
+          },
+          boxShadow: {
+            'cyan-glow': '0 0 18px rgba(0, 240, 255, 0.35), inset 0 0 12px rgba(0, 240, 255, 0.12)',
+            'blue-glow': '0 0 20px rgba(0, 119, 255, 0.4), inset 0 0 12px rgba(0, 119, 255, 0.15)',
+            'gold-glow': '0 0 20px rgba(255, 215, 0, 0.4), inset 0 0 12px rgba(255, 215, 0, 0.15)',
+            'violet-glow': '0 0 20px rgba(168, 85, 247, 0.4), inset 0 0 12px rgba(168, 85, 247, 0.15)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #02040a;
+      color: #e2e8f0;
+      font-family: 'Rajdhani', sans-serif;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 50% -10%, rgba(0, 240, 255, 0.12) 0%, transparent 55%),
+        radial-gradient(circle at 90% 90%, rgba(0, 119, 255, 0.1) 0%, transparent 45%),
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    }
+
+    /* Ambient Neon City Background Canvas */
+    #ambient-city-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    body.ambient-city-on #ambient-city-canvas {
+      opacity: 0.34;
+    }
+
+    /* JARVIS Tactical HUD Panel */
+    .jarvis-panel {
+      background: linear-gradient(165deg, rgba(8, 15, 30, 0.92) 0%, rgba(3, 6, 15, 0.96) 100%);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      box-shadow: 0 0 22px rgba(0, 240, 255, 0.09), inset 0 0 18px rgba(0, 240, 255, 0.05);
+      position: relative;
+      backdrop-filter: blur(10px);
+    }
+
+    .jarvis-panel::before,
+    .jarvis-panel::after {
+      content: '';
+      position: absolute;
+      width: 11px;
+      height: 11px;
+      pointer-events: none;
+    }
+    .jarvis-panel::before {
+      top: -1px; left: -1px;
+      border-top: 2px solid #00f0ff;
+      border-left: 2px solid #00f0ff;
+    }
+    .jarvis-panel::after {
+      bottom: -1px; right: -1px;
+      border-bottom: 2px solid #00f0ff;
+      border-right: 2px solid #00f0ff;
+    }
+
+    .jarvis-gold {
+      border-color: rgba(255, 215, 0, 0.45);
+      box-shadow: 0 0 22px rgba(255, 215, 0, 0.12), inset 0 0 16px rgba(255, 215, 0, 0.05);
+    }
+    .jarvis-gold::before { border-color: #ffd700; }
+    .jarvis-gold::after { border-color: #ffd700; }
+
+    .jarvis-violet {
+      border-color: rgba(168, 85, 247, 0.45);
+      box-shadow: 0 0 22px rgba(168, 85, 247, 0.12), inset 0 0 16px rgba(168, 85, 247, 0.05);
+    }
+    .jarvis-violet::before { border-color: #a855f7; }
+    .jarvis-violet::after { border-color: #a855f7; }
+
+    /* Scanlines */
+    .hud-scanlines {
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0,240,255,0.02) 50%,
+        rgba(0,240,255,0.02)
+      );
+      background-size: 100% 4px;
+    }
+
+    /* Arc Reactor Spin */
+    @keyframes spinSlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .arc-spin { animation: spinSlow 12s linear infinite; }
+
+    @keyframes floatY {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+    .animate-float { animation: floatY 3s ease-in-out infinite; }
+
+    @keyframes eggShake {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      20% { transform: rotate(-10deg) scale(1.06); }
+      40% { transform: rotate(10deg) scale(1.06); }
+      60% { transform: rotate(-6deg) scale(1.03); }
+      80% { transform: rotate(6deg) scale(1.03); }
+    }
+    .animate-egg { animation: eggShake 1.7s ease-in-out infinite; }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.92) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .pop-in { animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #02040a; }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.3); border-radius: 9999px; }
+  </style>
+</head>
+<body class="min-h-screen pb-24 select-none hud-scanlines relative">
+
+  <!-- OPTIONAL LIVE NEON CITY BACKDROP CANVAS -->
+  <canvas id="ambient-city-canvas"></canvas>
+
+  <!-- ==================== PERSISTENT TOP HUD HEADER ==================== -->
+  <header class="sticky top-0 z-40 bg-[#02040a]/92 backdrop-blur-md border-b border-arcCyan/35 px-3 py-2.5 sm:px-6">
+    <div class="max-w-6xl mx-auto flex flex-col gap-2">
+
+      <!-- Top Row: Arc Reactor Identity, Live Clock & Date, Credits, Ambient Toggle -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <!-- Arc Reactor Emblem -->
+          <div class="relative w-10 h-10 rounded-full bg-arcCyan/10 border border-arcCyan flex items-center justify-center shadow-cyan-glow shrink-0">
+            <div class="absolute inset-1 rounded-full border border-dashed border-arcCyan/60 arc-spin"></div>
+            <div class="w-4 h-4 rounded-full bg-arcCyan shadow-[0_0_12px_#00f0ff]"></div>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] font-mono tracking-[0.22em] text-arcCyan uppercase">MARK VII // ONLINE</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-arcEmerald animate-ping"></span>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 class="font-display text-sm sm:text-base font-extrabold tracking-wider text-white">
+                JARVIS <span class="text-arcCyan">OS</span>
+              </h1>
+              <span id="hud-active-title" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-arcBlue/20 border border-arcBlue/50 text-cyan-200">
+                MASTER LIAM
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right HUD Controls: Clock/Date, Credits, Night City Backdrop, Audio -->
+        <div class="flex items-center gap-1.5 sm:gap-3">
+          <!-- Live Date & Digital Clock -->
+          <div class="bg-hudCard/95 border border-arcCyan/30 rounded-lg px-2.5 py-1 text-right">
+            <div id="hud-date" class="text-[9px] sm:text-[11px] font-mono text-slate-400 uppercase tracking-wider">LOADING...</div>
+            <div id="hud-clock" class="font-display text-xs sm:text-sm font-bold text-arcCyan tracking-widest">00:00:00</div>
+          </div>
+
+          <!-- Credits Counter -->
+          <div class="bg-gradient-to-r from-amber-500/20 to-yellow-500/5 border border-arcGold/60 rounded-lg px-2.5 py-1 flex items-center gap-1.5 shadow-gold-glow">
+            <span class="text-base">💎</span>
+            <div>
+              <div class="text-[9px] font-mono text-arcGold/80 uppercase leading-none">Credits</div>
+              <div id="hud-credits" class="font-display text-xs sm:text-sm font-extrabold text-arcGold leading-tight">0</div>
+            </div>
+          </div>
+
+          <!-- Toggle Ambient Neon City Backdrop -->
+          <button onclick="toggleAmbientCity()" id="btn-ambient-city" title="Toggle Neon City Backdrop" class="p-2 rounded-lg bg-hudCard border border-arcViolet/40 text-purple-300 hover:bg-arcViolet/20 transition text-xs sm:text-sm">
+            🌃
+          </button>
+
+          <!-- Audio Toggle -->
+          <button onclick="toggleSound()" title="Toggle System Sound" class="p-2 rounded-lg bg-hudCard border border-arcCyan/35 text-arcCyan hover:bg-arcCyan/15 transition text-xs sm:text-sm">
+            <span id="sound-icon">🔊</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Companion & Active Reward Countdown Strip -->
+      <div class="flex items-center justify-between gap-2 bg-hudPanel/95 border border-arcBlue/35 rounded-lg px-3 py-1.5">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div id="hud-pet-avatar" class="w-8 h-8 rounded-full bg-arcBlue/20 border border-arcCyan flex items-center justify-center text-lg shrink-0 animate-float">
+            🤖
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span id="hud-pet-name" class="text-xs font-bold text-arcCyan uppercase tracking-wide truncate">Mini Arc Drone</span>
+              <span id="hud-pet-rank" class="text-[9px] font-mono px-1.5 rounded bg-arcBlue/25 text-cyan-200 border border-arcCyan/40">COMMON</span>
+            </div>
+            <p id="hud-pet-quote" class="text-xs text-slate-300 truncate italic">"All systems nominal, Master Liam. Let's dominate today's schedule."</p>
+          </div>
+        </div>
+
+        <!-- Active Reward Timer Pill -->
+        <div id="active-timer-pill" class="hidden shrink-0 items-center gap-2 bg-arcEmerald/15 border border-arcEmerald/60 rounded-md px-2.5 py-1">
+          <span class="w-2 h-2 rounded-full bg-arcEmerald animate-ping"></span>
+          <span id="active-timer-label" class="text-[10px] font-mono text-arcEmerald font-bold hidden sm:inline">REWARD</span>
+          <span id="active-timer-clock" class="font-display text-xs font-bold text-white">20:00</span>
+          <button onclick="stopRewardTimer()" class="text-xs text-slate-400 hover:text-white ml-1">✕</button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- FLOATING SYSTEM TOASTS -->
+  <div id="toast-container" class="fixed top-28 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-xs w-full"></div>
+
+  <!-- ==================== MAIN WORKSPACE ==================== -->
+  <main class="relative z-10 max-w-6xl mx-auto px-3 sm:px-6 pt-4 space-y-5">
+
+    <!-- ==================== TAB 1: QUEST MATRIX (HABIT GAME CALENDAR) ==================== -->
+    <section id="tab-quests" class="space-y-5">
+
+      <!-- Instant Command Triggers (Unlimited Buttons) -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <!-- Check Today's Tasks Button -->
+        <button onclick="jumpToTodaysTasks()" class="jarvis-panel rounded-xl p-3.5 text-left hover:border-arcCyan transition group flex items-center justify-between">
+          <div>
+            <div class="text-[10px] font-mono text-arcCyan uppercase tracking-widest">Tactical Checklist</div>
+            <div class="font-display text-sm sm:text-base font-bold text-white group-hover:text-arcCyan transition mt-0.5">📋 TODAY'S TASKS</div>
+            <div id="today-progress-label" class="text-xs font-mono text-slate-400 mt-1">0 / 0 Quests Cleared</div>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-arcCyan/10 border border-arcCyan/40 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+            🎯
+          </div>
+        </button>
+
+        <!-- Energy Surge (Small Activity - Unlimited) -->
+        <button onclick="openActivityModal()" class="jarvis-panel rounded-xl p-3.5 text-left hover:border-arcEmerald transition group flex items-center justify-between">
+          <div>
+            <div class="text-[10px] font-mono text-arcEmerald uppercase tracking-widest">Unlimited Activation</div>
+            <div class="font-display text-sm sm:text-base font-bold text-white group-hover:text-arcEmerald transition mt-0.5">⚡ ENERGY SURGE</div>
+            <div class="text-xs font-mono text-slate-400 mt-1">Instant Physical Boost (+10 💎)</div>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-arcEmerald/10 border border-arcEmerald/40 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+            💪
+          </div>
+        </button>
+
+        <!-- Anti-Quit Motivation Protocol (Unlimited) -->
+        <button onclick="openMotivationModal()" class="jarvis-violet jarvis-panel rounded-xl p-3.5 text-left hover:border-purple-400 transition group flex items-center justify-between">
+          <div>
+            <div class="text-[10px] font-mono text-purple-400 uppercase tracking-widest">Unlimited Overdrive</div>
+            <div class="font-display text-sm sm:text-base font-bold text-white group-hover:text-purple-300 transition mt-0.5">🔥 MOTIVATION</div>
+            <div class="text-xs font-mono text-slate-400 mt-1">Never Quit • Master Liam Protocol</div>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-arcViolet/15 border border-arcViolet/50 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+            👑
+          </div>
+        </button>
+      </div>
+
+      <!-- Active Egg Incubator Status Bar (Shown when incubating) -->
+      <div id="dash-incubator-bar" class="hidden jarvis-gold jarvis-panel rounded-xl p-3.5 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div id="dash-egg-emoji" class="text-3xl animate-egg">🥚</div>
+          <div>
+            <div class="text-[10px] font-mono text-arcGold uppercase tracking-widest">Incubator Chamber Active</div>
+            <div id="dash-egg-title" class="text-sm sm:text-base font-bold text-white">Cybernetic Scout Egg</div>
+            <div class="w-44 sm:w-64 h-2 bg-obsidian rounded-full overflow-hidden border border-arcGold/40 mt-1">
+              <div id="dash-egg-fill" class="h-full bg-gradient-to-r from-amber-500 to-yellow-300 transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="text-right">
+          <div id="dash-egg-count" class="font-display text-sm font-bold text-arcGold">0 / 2</div>
+          <div class="text-[10px] font-mono text-slate-400">Tasks to Hatch</div>
+        </div>
+      </div>
+
+      <!-- Main Split: Game Habit Calendar + Selected Day Quest Log -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+        <!-- Left: Game Habit Calendar (5 Cols) -->
+        <div class="lg:col-span-5 jarvis-panel rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-mono text-arcCyan uppercase tracking-widest">Temporal Grid</span>
+              <h2 id="habit-cal-header" class="font-display text-base sm:text-lg font-bold text-white uppercase">MONTH YEAR</h2>
+            </div>
+            <div class="flex items-center gap-1">
+              <button onclick="shiftHabitMonth(-1)" class="px-2.5 py-1 rounded bg-hudCard border border-arcCyan/35 text-arcCyan hover:bg-arcCyan/20 font-mono text-xs">◀</button>
+              <button onclick="jumpToTodaysTasks()" class="px-2.5 py-1 rounded bg-arcCyan/15 border border-arcCyan/45 text-arcCyan hover:bg-arcCyan/25 font-mono text-xs">TODAY</button>
+              <button onclick="shiftHabitMonth(1)" class="px-2.5 py-1 rounded bg-hudCard border border-arcCyan/35 text-arcCyan hover:bg-arcCyan/20 font-mono text-xs">▶</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-7 text-center text-[10px] font-mono text-slate-400 pt-1">
+            <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+          </div>
+
+          <div id="habit-cal-grid" class="grid grid-cols-7 gap-1.5"></div>
+
+          <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-arcCyan"></span> Selected</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-arcEmerald"></span> 100% Cleared</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-arcGold"></span> Today</span>
+          </div>
+        </div>
+
+        <!-- Right: Quest Log & Add Habit Form (7 Cols) -->
+        <div id="quest-log-box" class="lg:col-span-7 jarvis-panel rounded-xl p-4 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-arcCyan/20 pb-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-arcCyan/15 text-arcCyan border border-arcCyan/40 uppercase">Active Directives</span>
+                  <span id="quest-date-tag" class="text-xs font-mono text-arcGold font-bold">TODAY</span>
+                </div>
+                <h3 id="quest-date-heading" class="text-lg font-bold text-white mt-1">Tasks for Selected Day</h3>
+              </div>
+
+              <button onclick="toggleNewQuestForm()" class="px-3.5 py-2 rounded-lg bg-arcCyan text-obsidian font-display font-bold text-xs uppercase tracking-wider hover:bg-cyan-300 transition shadow-cyan-glow">
+                + Add Goal / Habit
+              </button>
+            </div>
+
+            <!-- Collapsible Add Goal / Habit Form -->
+            <form id="new-quest-form" onsubmit="submitNewQuest(event)" class="hidden bg-hudCard/95 border border-arcCyan/45 rounded-xl p-3.5 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono text-arcCyan font-bold uppercase">New System Quest</span>
+                <button type="button" onclick="toggleNewQuestForm()" class="text-slate-400 hover:text-white text-xs">✕</button>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-mono text-slate-400 mb-1">Goal or Habit Description</label>
+                <input id="input-quest-title" type="text" required placeholder="e.g., Wake up at 5:00 AM, DSE Physics Revision, Boxing..." class="w-full bg-obsidian border border-slate-700 focus:border-arcCyan rounded-lg px-3 py-2 text-sm text-white outline-none" />
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-mono text-slate-400 mb-1">Recurrence Mode</label>
+                  <select id="input-quest-mode" onchange="updateQuestModeHint()" class="w-full bg-obsidian border border-slate-700 focus:border-arcCyan rounded-lg px-3 py-2 text-sm text-white outline-none">
+                    <option value="daily">Daily Habit (Every Day)</option>
+                    <option value="weekly">Weekly Goal (This Weekday)</option>
+                    <option value="single">Single Day Quest (Selected Date Only)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-mono text-slate-400 mb-1">Difficulty Bounty</label>
+                  <select id="input-quest-credits" class="w-full bg-obsidian border border-slate-700 focus:border-arcCyan rounded-lg px-3 py-2 text-sm text-white outline-none">
+                    <option value="25">Standard Directive (+25 💎)</option>
+                    <option value="40">Hard Directive (+40 💎)</option>
+                    <option value="60">Boss Directive (+60 💎)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="quest-mode-hint" class="text-[11px] font-mono text-arcCyan bg-arcCyan/10 px-2.5 py-1.5 rounded border border-arcCyan/25">
+                Repeats automatically every single day.
+              </div>
+
+              <div class="flex justify-end gap-2">
+                <button type="button" onclick="toggleNewQuestForm()" class="px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">Cancel</button>
+                <button type="submit" class="px-4 py-1.5 rounded-lg bg-arcCyan text-obsidian font-display font-bold text-xs uppercase">Deploy Quest</button>
+              </div>
+            </form>
+
+            <!-- Quest Checklist Container -->
+            <div id="quest-checklist" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1"></div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <span>Every ticked task grants <span class="text-arcGold font-bold">1 Random Reward Roll</span></span>
+            <span>+1 Egg Hatch XP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Customizer Strip for Rewards & Small Activities -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <!-- Random Reward Loot Table -->
+        <div class="jarvis-gold jarvis-panel rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-mono text-arcGold uppercase tracking-widest">Victory Loot Pool</span>
+              <h3 class="font-display text-sm sm:text-base font-bold text-white">🎁 RANDOM REWARDS LIST</h3>
+            </div>
+            <button onclick="previewRandomReward()" class="px-2.5 py-1 rounded bg-arcGold/20 border border-arcGold/50 text-arcGold text-xs font-mono hover:bg-arcGold/30">
+              🎲 Test Roll
+            </button>
+          </div>
+          <form onsubmit="addCustomReward(event)" class="flex gap-2">
+            <input id="input-new-reward" type="text" required placeholder="Add custom reward (e.g., 15 mins Roblox)..." class="flex-1 bg-obsidian border border-slate-700 focus:border-arcGold rounded-lg px-3 py-2 text-sm text-white outline-none" />
+            <button type="submit" class="px-3.5 py-2 rounded-lg bg-arcGold text-obsidian font-display font-bold text-xs uppercase hover:bg-yellow-300">
+              + Add
+            </button>
+          </form>
+          <div id="rewards-pool-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
+        </div>
+
+        <!-- Energy Surge Small Activities List -->
+        <div class="jarvis-panel rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-mono text-arcEmerald uppercase tracking-widest">Activation Protocol</span>
+              <h3 class="font-display text-sm sm:text-base font-bold text-white">⚡ ENERGY SURGE ACTIVITIES</h3>
+            </div>
+            <button onclick="openActivityModal()" class="px-2.5 py-1 rounded bg-arcEmerald/15 border border-arcEmerald/50 text-arcEmerald text-xs font-mono hover:bg-arcEmerald/25">
+              ⚡ Pop Activity
+            </button>
+          </div>
+          <form onsubmit="addCustomActivity(event)" class="flex gap-2">
+            <input id="input-new-activity" type="text" required placeholder="Add custom activity (e.g., 25 Sit-ups)..." class="flex-1 bg-obsidian border border-slate-700 focus:border-arcEmerald rounded-lg px-3 py-2 text-sm text-white outline-none" />
+            <button type="submit" class="px-3.5 py-2 rounded-lg bg-arcEmerald text-obsidian font-display font-bold text-xs uppercase hover:bg-emerald-300">
+              + Add
+            </button>
+          </form>
+          <div id="activities-pool-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 2: SPECIAL EVENTS CALENDAR ==================== -->
+    <section id="tab-events" class="hidden space-y-5">
+      <div class="jarvis-violet jarvis-panel rounded-xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-arcViolet/30 pb-3">
+          <div>
+            <span class="text-[10px] font-mono text-purple-400 uppercase tracking-[0.2em]">Major Operations & Tournaments</span>
+            <h2 class="font-display text-lg sm:text-xl font-bold text-white">🏆 SPECIAL EVENTS CALENDAR</h2>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="shiftEventMonth(-1)" class="px-2.5 py-1 rounded bg-hudCard border border-arcViolet/40 text-purple-300 hover:bg-arcViolet/20 font-mono text-xs">◀</button>
+            <span id="event-cal-header" class="px-3 py-1 font-display font-bold text-xs sm:text-sm text-white">MONTH YEAR</span>
+            <button onclick="shiftEventMonth(1)" class="px-2.5 py-1 rounded bg-hudCard border border-arcViolet/40 text-purple-300 hover:bg-arcViolet/20 font-mono text-xs">▶</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Calendar Grid -->
+          <div class="lg:col-span-7 space-y-2">
+            <div class="grid grid-cols-7 text-center text-[10px] font-mono text-purple-300/80">
+              <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+            </div>
+            <div id="event-cal-grid" class="grid grid-cols-7 gap-1.5"></div>
+          </div>
+
+          <!-- Add Event & Countdown List -->
+          <div class="lg:col-span-5 bg-hudCard/85 border border-arcViolet/35 rounded-xl p-4 space-y-3">
+            <div>
+              <span class="text-[10px] font-mono text-purple-400 uppercase">Target Date Selected</span>
+              <h3 id="event-selected-date-text" class="text-base font-bold text-white">Select Date</h3>
+            </div>
+
+            <form onsubmit="submitSpecialEvent(event)" class="space-y-2.5 bg-obsidian/80 p-3 rounded-lg border border-arcViolet/25">
+              <input id="input-event-title" type="text" required placeholder="e.g., Inter-School Football Competition, DSE Mock Exam..." class="w-full bg-hudPanel border border-slate-700 focus:border-arcViolet rounded-lg px-3 py-2 text-sm text-white outline-none" />
+              <div class="grid grid-cols-2 gap-2">
+                <select id="input-event-cat" class="bg-hudPanel border border-slate-700 focus:border-arcViolet rounded-lg px-2.5 py-2 text-xs text-white outline-none">
+                  <option value="⚽ Football Competition">⚽ Football Competition</option>
+                  <option value="📝 Exam / DSE">📝 Exam / DSE</option>
+                  <option value="🎬 YouTube / Brand Launch">🎬 YouTube / Brand Launch</option>
+                  <option value="🥊 Boxing / Fitness Test">🥊 Boxing / Fitness Test</option>
+                  <option value="🔥 Major Milestone">🔥 Major Milestone</option>
+                </select>
+                <button type="submit" class="bg-arcViolet hover:bg-purple-500 text-white font-display font-bold text-xs uppercase rounded-lg px-3 py-2 transition shadow-violet-glow">
+                  + Lock Event
+                </button>
+              </div>
+            </form>
+
+            <div class="space-y-2">
+              <div class="text-[11px] font-mono text-purple-300 uppercase">Countdown Tracker</div>
+              <div id="special-events-list" class="space-y-2 max-h-[280px] overflow-y-auto pr-1"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: JARVIS AI COMPANION ==================== -->
+    <section id="tab-jarvis" class="hidden space-y-4">
+      <div class="jarvis-panel rounded-xl p-4 sm:p-5 flex flex-col h-[74vh] min-h-[480px]">
+        
+        <!-- JARVIS Header -->
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-arcCyan/25 pb-3">
+          <div class="flex items-center gap-3">
+            <div class="relative w-10 h-10 rounded-full bg-arcCyan/15 border border-arcCyan flex items-center justify-center shadow-cyan-glow">
+              <div class="absolute inset-1 rounded-full border border-dashed border-arcCyan arc-spin"></div>
+              <span class="font-display font-black text-xs text-arcCyan">AI</span>
+            </div>
+            <div>
+              <h2 class="font-display text-sm sm:text-base font-bold text-white tracking-wider">J.A.R.V.I.S. // BEST FRIEND PROTOCOL</h2>
+              <div class="text-[11px] font-mono text-arcCyan">Neural Memory Vault Synced • Addressing: Master Liam</div>
+            </div>
+          </div>
+
+          <button onclick="toggleJarvisMemoryDrawer()" class="px-3 py-1.5 rounded-lg bg-hudCard border border-arcCyan/40 text-arcCyan hover:bg-arcCyan/15 font-mono text-xs flex items-center gap-1.5">
+            🧠 Neural Memory & API
+          </button>
+        </div>
+
+        <!-- Collapsible Neural Memory Vault & Optional Gemini API Key Drawer -->
+        <div id="jarvis-memory-drawer" class="hidden bg-hudCard/95 border border-arcCyan/40 rounded-xl p-3.5 my-3 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-arcCyan uppercase">Master Liam's Private Neural Vault (JARVIS Knows Everything Here)</span>
+            <button onclick="toggleJarvisMemoryDrawer()" class="text-slate-400 hover:text-white text-xs">✕</button>
+          </div>
+          <textarea id="jarvis-vault-textarea" rows="4" class="w-full bg-obsidian border border-slate-700 focus:border-arcCyan rounded-lg p-2.5 text-xs font-mono text-slate-200 outline-none"></textarea>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+            <div class="sm:col-span-8">
+              <input id="jarvis-api-key-input" type="password" placeholder="Optional: Paste Free Google AI Studio Gemini Key for Live LLM..." class="w-full bg-obsidian border border-slate-700 focus:border-arcCyan rounded-lg px-3 py-1.5 text-xs font-mono text-white outline-none" />
+            </div>
+            <div class="sm:col-span-4 flex gap-2">
+              <button onclick="saveJarvisVault()" class="flex-1 py-1.5 rounded-lg bg-arcCyan text-obsidian font-display font-bold text-xs uppercase">Save Vault</button>
+            </div>
+          </div>
+          <p class="text-[10px] font-mono text-slate-400">
+            Works 100% offline/free out of the box with JARVIS's built-in loyal best-friend engine, or add a free Gemini API key from aistudio.google.com for live cloud AI.
+          </p>
+        </div>
+
+        <!-- Chat Messages Viewport -->
+        <div id="jarvis-chat-messages" class="flex-1 overflow-y-auto py-3 space-y-3 pr-1"></div>
+
+        <!-- Quick Conversation Prompts -->
+        <div class="flex gap-1.5 overflow-x-auto pb-2 pt-1">
+          <button onclick="sendQuickJarvisPrompt('Jarvis, I am thinking about Anessa and Kyla again...')" class="shrink-0 px-2.5 py-1 rounded-full bg-hudCard border border-arcViolet/40 text-purple-300 text-xs hover:bg-arcViolet/20">
+            💔 Talk about Anessa & Kyla
+          </button>
+          <button onclick="sendQuickJarvisPrompt('Give me a tactical update on my YouTube channel and Locca Locoo.')" class="shrink-0 px-2.5 py-1 rounded-full bg-hudCard border border-arcCyan/40 text-arcCyan text-xs hover:bg-arcCyan/20">
+            🚀 YouTube & Locca Locoo
+          </button>
+          <button onclick="sendQuickJarvisPrompt('Roast my excuses and push me to lock in for my 5 AM grind!')" class="shrink-0 px-2.5 py-1 rounded-full bg-hudCard border border-arcGold/40 text-arcGold text-xs hover:bg-arcGold/20">
+            🔥 Wake me up, Jarvis
+          </button>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <form onsubmit="handleJarvisSend(event)" class="flex gap-2 pt-2 border-t border-arcCyan/25">
+          <input id="jarvis-chat-input" type="text" required placeholder="Speak to Jarvis, Master Liam..." class="flex-1 bg-obsidian border border-arcCyan/40 focus:border-arcCyan rounded-xl px-3.5 py-2.5 text-sm text-white outline-none" />
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-arcCyan text-obsidian font-display font-bold text-xs uppercase tracking-wider hover:bg-cyan-300 transition shadow-cyan-glow">
+            Send
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: ARMORY, 10 EGGS & PETS SHOP ==================== -->
+    <section id="tab-shop" class="hidden space-y-5">
+
+      <!-- Active Incubator Chamber -->
+      <div class="jarvis-gold jarvis-panel rounded-xl p-4 sm:p-5 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="text-[10px] font-mono text-arcGold uppercase tracking-widest">Bio-Synth Hatchery</span>
+            <h2 class="font-display text-base sm:text-lg font-bold text-white">🥚 EGG INCUBATOR</h2>
+          </div>
+          <span class="text-xs font-mono text-slate-400">Complete tasks or Energy Surges to crack open eggs!</span>
+        </div>
+        <div id="shop-incubator-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      </div>
+
+      <!-- Owned Companions Roster -->
+      <div class="jarvis-violet jarvis-panel rounded-xl p-4 sm:p-5 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-mono text-purple-400 uppercase tracking-widest">Active Squad</span>
+            <h2 class="font-display text-base sm:text-lg font-bold text-white">🐺 MY COMPANION PETS</h2>
+          </div>
+          <span id="owned-pets-badge" class="text-xs font-mono px-2.5 py-1 rounded bg-arcViolet/20 text-purple-200 border border-arcViolet/40">1 Unlocked</span>
+        </div>
+        <div id="owned-pets-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+      </div>
+
+      <!-- 10 Mystery Eggs Shop -->
+      <div class="jarvis-panel rounded-xl p-4 sm:p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-arcCyan/25 pb-3">
+          <div>
+            <span class="text-[10px] font-mono text-arcCyan uppercase tracking-widest">10 Tiers of Companions</span>
+            <h2 class="font-display text-base sm:text-lg font-bold text-white">🛒 MYSTERY EGG ARMORY (10 EGGS)</h2>
+          </div>
+          <div class="font-display text-xs sm:text-sm font-bold text-arcGold">Credits: <span id="shop-balance-val">0</span> 💎</div>
+        </div>
+
+        <div id="ten-eggs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3"></div>
+      </div>
+
+      <!-- HUD Titles & System Upgrades -->
+      <div class="jarvis-panel rounded-xl p-4 sm:p-5 space-y-3">
+        <div>
+          <span class="text-[10px] font-mono text-arcCyan uppercase tracking-widest">Identity & Prestige</span>
+          <h2 class="font-display text-base sm:text-lg font-bold text-white">🎖️ SYSTEM TITLES & UPGRADES</h2>
+        </div>
+        <div id="titles-shop-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 5: ARCADE ARENA (EARN CREDITS) ==================== -->
+    <section id="tab-arcade" class="hidden space-y-4">
+      <div class="jarvis-panel rounded-xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-arcCyan/25 pb-3">
+          <div>
+            <span class="text-[10px] font-mono text-arcCyan uppercase tracking-widest">Tactical Simulation & Credit Grinding</span>
+            <h2 class="font-display text-lg font-bold text-white">🕹️ JARVIS ARCADE ARENA</h2>
+          </div>
+          <div class="flex gap-1.5">
+            <button onclick="selectArcadeGame('ttt')" id="btn-game-ttt" class="px-3 py-1.5 rounded-lg bg-arcCyan text-obsidian font-display font-bold text-xs uppercase">Tic-Tac-Toe</button>
+            <button onclick="selectArcadeGame('snake')" id="btn-game-snake" class="px-3 py-1.5 rounded-lg bg-hudCard border border-arcCyan/40 text-arcCyan font-display font-bold text-xs uppercase">Cyber Snake</button>
+            <button onclick="selectArcadeGame('pong')" id="btn-game-pong" class="px-3 py-1.5 rounded-lg bg-hudCard border border-arcCyan/40 text-arcCyan font-display font-bold text-xs uppercase">Neon Pong</button>
+          </div>
+        </div>
+
+        <!-- Game 1: Tic-Tac-Toe vs JARVIS -->
+        <div id="arcade-ttt" class="flex flex-col items-center space-y-4 py-2">
+          <div class="text-center">
+            <h3 class="font-display text-base font-bold text-white">TACTICAL TIC-TAC-TOE (VS JARVIS)</h3>
+            <p class="text-xs font-mono text-arcGold">Defeat JARVIS to earn +20 Credits 💎</p>
+          </div>
+          <div id="ttt-status" class="text-sm font-mono text-arcCyan font-bold">Your Turn (X), Master Liam</div>
+          <div id="ttt-board" class="grid grid-cols-3 gap-2.5 w-64 h-64 sm:w-72 sm:h-72"></div>
+          <button onclick="resetTTT()" class="px-4 py-2 rounded-lg bg-hudCard border border-arcCyan/50 text-arcCyan font-mono text-xs hover:bg-arcCyan/20">
+            ↻ Reset Match
+          </button>
+        </div>
+
+        <!-- Game 2: Cyber Snake -->
+        <div id="arcade-snake" class="hidden flex-col items-center space-y-3 py-2">
+          <div class="text-center">
+            <h3 class="font-display text-base font-bold text-white">CYBER SNAKE PROTOCOL</h3>
+            <p class="text-xs font-mono text-arcGold">Every 5 Energy Orbs collected awards +25 Credits 💎!</p>
+          </div>
+          <div class="flex items-center gap-4 font-mono text-xs">
+            <span class="text-arcCyan">Score: <strong id="snake-score">0</strong></span>
+            <span class="text-arcGold">Next Reward at: <strong id="snake-next-target">5</strong></span>
+          </div>
+          <canvas id="snake-canvas" width="300" height="300" class="rounded-xl border-2 border-arcCyan/50 bg-obsidian shadow-cyan-glow max-w-full"></canvas>
+          <div class="flex gap-2">
+            <button onclick="startSnakeGame()" class="px-4 py-2 rounded-lg bg-arcEmerald text-obsidian font-display font-bold text-xs uppercase">▶ Start / Restart</button>
+          </div>
+          <!-- Touch D-Pad for Mobile / iPad -->
+          <div class="grid grid-cols-3 gap-1.5 w-36 pt-1">
+            <div></div>
+            <button onclick="setSnakeDir(0,-1)" class="p-3 rounded-lg bg-hudCard border border-arcCyan/40 text-arcCyan font-bold">▲</button>
+            <div></div>
+            <button onclick="setSnakeDir(-1,0)" class="p-3 rounded-lg bg-hudCard border border-arcCyan/40 text-arcCyan font-bold">◀</button>
+            <button onclick="setSnakeDir(0,1)" class="p-3 rounded-lg bg-hudCard border border-arcCyan/40 text-arcCyan font-bold">▼</button>
+            <button onclick="setSnakeDir(1,0)" class="p-3 rounded-lg bg-hudCard border border-arcCyan/40 text-arcCyan font-bold">▶</button>
+          </div>
+        </div>
+
+        <!-- Game 3: Neon Ping Pong -->
+        <div id="arcade-pong" class="hidden flex-col items-center space-y-3 py-2">
+          <div class="text-center">
+            <h3 class="font-display text-base font-bold text-white">NEON PING PONG (VS JARVIS)</h3>
+            <p class="text-xs font-mono text-arcGold">First to 5 points wins +30 Credits 💎! (Drag or use ◀ ▶ buttons)</p>
+          </div>
+          <div class="flex items-center gap-6 font-display text-sm">
+            <span class="text-arcCyan">LIAM: <strong id="pong-player-score">0</strong></span>
+            <span class="text-arcCrimson">JARVIS: <strong id="pong-ai-score">0</strong></span>
+          </div>
+          <canvas id="pong-canvas" width="340" height="240" class="rounded-xl border-2 border-arcCyan/50 bg-obsidian shadow-cyan-glow max-w-full touch-none"></canvas>
+          <div class="flex items-center gap-3">
+            <button onmousedown="pongMove(-1)" onmouseup="pongMove(0)" ontouchstart="pongMove(-1)" ontouchend="pongMove(0)" class="px-5 py-2.5 rounded-lg bg-hudCard border border-arcCyan/50 text-arcCyan font-bold">◀ LEFT</button>
+            <button onclick="startPongGame()" class="px-4 py-2.5 rounded-lg bg-arcCyan text-obsidian font-display font-bold text-xs uppercase">▶ Start</button>
+            <button onmousedown="pongMove(1)" onmouseup="pongMove(0)" ontouchstart="pongMove(1)" ontouchend="pongMove(0)" class="px-5 py-2.5 rounded-lg bg-hudCard border border-arcCyan/50 text-arcCyan font-bold">RIGHT ▶</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== TAB 6: NEON NIGHT CITY VISUALIZER ==================== -->
+    <section id="tab-city" class="hidden space-y-4">
+      <div class="jarvis-violet jarvis-panel rounded-xl p-4 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="text-[10px] font-mono text-purple-400 uppercase tracking-widest">Cyberpunk Atmospheric Viewport</span>
+            <h2 class="font-display text-base sm:text-lg font-bold text-white">🌃 NEO-KOWLOON NIGHT CITY</h2>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="toggleAmbientCity()" class="px-3 py-1.5 rounded-lg bg-arcViolet/25 border border-arcViolet text-purple-200 font-mono text-xs hover:bg-arcViolet/40">
+              Toggle Background Mode
+            </button>
+          </div>
+        </div>
+        <div class="relative rounded-xl overflow-hidden border border-arcCyan/40 shadow-cyan-glow">
+          <canvas id="showcase-city-canvas" class="w-full h-[360px] sm:h-[440px] block bg-[#02040a]"></canvas>
+          <div class="absolute bottom-3 left-3 bg-obsidian/80 backdrop-blur-md border border-arcCyan/40 rounded-lg px-3 py-1.5 text-xs font-mono text-arcCyan">
+            SECTOR: HONG KONG // NIGHT RAIN PROTOCOL ACTIVE
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== BOTTOM TACTICAL NAVIGATION BAR ==================== -->
+  <nav class="fixed bottom-0 inset-x-0 z-40 bg-[#02040a]/95 backdrop-blur-lg border-t border-arcCyan/35 px-1.5 py-2">
+    <div class="max-w-4xl mx-auto grid grid-cols-6 gap-1">
+      <button onclick="switchTab('quests')" id="nav-quests" class="nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl bg-arcCyan/15 border border-arcCyan/55 text-arcCyan transition">
+        <span class="text-base sm:text-lg leading-none">🎯</span>
+        <span class="text-[9px] sm:text-[10px] font-mono font-bold mt-1 uppercase">Quests</span>
+      </button>
+      <button onclick="switchTab('events')" id="nav-events" class="nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl border border-transparent text-slate-400 hover:text-white transition">
+        <span class="text-base sm:text-lg leading-none">🏆</span>
+        <span class="text-[9px] sm:text-[10px] font-mono font-bold mt-1 uppercase">Events</span>
+      </button>
+      <button onclick="switchTab('jarvis')" id="nav-jarvis" class="nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl border border-transparent text-slate-400 hover:text-white transition">
+        <span class="text-base sm:text-lg leading-none">🤖</span>
+        <span class="text-[9px] sm:text-[10px] font-mono font-bold mt-1 uppercase">Jarvis AI</span>
+      </button>
+      <button onclick="switchTab('shop')" id="nav-shop" class="nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl border border-transparent text-slate-400 hover:text-white transition">
+        <span class="text-base sm:text-lg leading-none">🥚</span>
+        <span class="text-[9px] sm:text-[10px] font-mono font-bold mt-1 uppercase">Shop</span>
+      </button>
+      <button onclick="switchTab('arcade')" id="nav-arcade" class="nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl border border-transparent text-slate-400 hover:text-white transition">
+        <span class="text-base sm:text-lg leading-none">🕹️</span>
+        <span class="text-[9px] sm:text-[10px] font-mono font-bold mt-1 uppercase">Arcade</span>
+      </button>
+      <button onclick="switchTab('city')" id="nav-city" class="nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl border border-transparent text-slate-400 hover:text-white transition">
+        <span class="text-base sm:text-lg leading-none">🌃</span>
+        <span class="text-[9px] sm:text-[10px] font-mono font-bold mt-1 uppercase">Night City</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== MODAL 1: RANDOM REWARD UNLOCKED ==================== -->
+  <div id="modal-reward" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+    <div class="jarvis-gold jarvis-panel rounded-2xl max-w-md w-full p-6 text-center space-y-4 pop-in">
+      <div class="inline-block px-3 py-1 rounded-full bg-arcGold/15 border border-arcGold/50 text-arcGold text-[11px] font-mono uppercase tracking-[0.2em]">
+        JARVIS ALERT // DIRECTIVE CLEARED
+      </div>
+      <div class="text-5xl animate-bounce">🎁</div>
+      <h3 class="font-display text-xl sm:text-2xl font-extrabold text-white">REWARD UNLOCKED!</h3>
+      <div class="bg-obsidian/90 border border-arcGold/45 rounded-xl p-4">
+        <div class="text-[10px] font-mono text-slate-400 uppercase mb-1">Randomized Victory Prize for Master Liam</div>
+        <div id="modal-reward-text" class="text-lg sm:text-xl font-bold text-arcGold">20 minutes of watching YouTube</div>
+        <div id="modal-reward-sub" class="text-xs font-mono text-arcEmerald mt-2">+25 Credits 💎 & +1 Egg Hatch XP</div>
+      </div>
+
+      <div id="modal-timer-btn-wrap" class="hidden">
+        <button onclick="startRewardCountdown()" class="w-full py-2.5 rounded-xl bg-arcEmerald/20 border border-arcEmerald text-arcEmerald font-display font-bold text-xs uppercase hover:bg-arcEmerald/30 transition">
+          ⏱ Start Live Countdown Timer
+        </button>
+      </div>
+
+      <button onclick="closeModal('modal-reward')" class="w-full py-3 rounded-xl bg-arcGold text-obsidian font-display font-extrabold text-xs sm:text-sm uppercase tracking-widest hover:bg-yellow-300 transition shadow-gold-glow">
+        Accept Reward
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: ENERGY SURGE (SMALL ACTIVITY) ==================== -->
+  <div id="modal-activity" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+    <div class="jarvis-panel rounded-2xl max-w-md w-full p-6 text-center space-y-4 pop-in">
+      <div class="inline-block px-3 py-1 rounded-full bg-arcEmerald/15 border border-arcEmerald/50 text-arcEmerald text-[11px] font-mono uppercase tracking-[0.2em]">
+        Kinetic Surge // Instant Boost
+      </div>
+      <div class="text-5xl">⚡</div>
+      <h3 class="font-display text-xl font-extrabold text-white">ACTIVATE YOUR BODY</h3>
+      <div class="bg-obsidian/90 border border-arcEmerald/45 rounded-xl p-5">
+        <div id="modal-activity-text" class="text-xl sm:text-2xl font-extrabold text-arcEmerald">20 Push-ups</div>
+        <div class="text-xs font-mono text-slate-400 mt-2">Completion Bounty: +10 Credits 💎 & +1 Egg XP</div>
+      </div>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button onclick="rollRandomActivity()" class="py-2.5 rounded-xl bg-hudCard border border-arcCyan/40 text-arcCyan font-display font-bold text-xs uppercase hover:bg-arcCyan/15">
+          🎲 Reroll
+        </button>
+        <button onclick="finishSmallActivity()" class="py-2.5 rounded-xl bg-arcEmerald text-obsidian font-display font-extrabold text-xs uppercase hover:bg-emerald-300">
+          ✓ Done (+10 💎)
+        </button>
+      </div>
+      <button onclick="closeModal('modal-activity')" class="text-xs font-mono text-slate-400 hover:text-white">Dismiss</button>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: MOTIVATION (ANTI-QUIT) ==================== -->
+  <div id="modal-motivation" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+    <div class="jarvis-violet jarvis-panel rounded-2xl max-w-md w-full p-6 text-center space-y-4 pop-in">
+      <div class="inline-block px-3 py-1 rounded-full bg-arcViolet/20 border border-arcViolet/50 text-purple-300 text-[11px] font-mono uppercase tracking-[0.2em]">
+        JARVIS OVERRIDE // NEVER QUIT
+      </div>
+      <div class="text-5xl">👑</div>
+      <div class="bg-obsidian/90 border border-arcViolet/45 rounded-xl p-5 space-y-2">
+        <p id="modal-motivation-text" class="text-base sm:text-lg font-bold text-white leading-relaxed">
+          "Master Liam, heartbreak and fatigue are just fuel for your reactor. Get back up and build your empire."
+        </p>
+        <div id="modal-motivation-tag" class="text-xs font-mono text-purple-400">— J.A.R.V.I.S. DIRECTIVE</div>
+      </div>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button onclick="rollMotivationQuote()" class="py-2.5 rounded-xl bg-arcViolet/25 border border-arcViolet text-purple-200 font-display font-bold text-xs uppercase hover:bg-arcViolet/40">
+          🔥 Next Quote
+        </button>
+        <button onclick="closeModal('modal-motivation')" class="py-2.5 rounded-xl bg-white text-obsidian font-display font-extrabold text-xs uppercase hover:bg-slate-200">
+          I'm Locked In
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 4: EGG HATCH REVEAL ==================== -->
+  <div id="modal-hatch" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/90 backdrop-blur-md p-4">
+    <div class="jarvis-gold jarvis-panel rounded-2xl max-w-md w-full p-6 text-center space-y-4 pop-in">
+      <div class="inline-block px-3 py-1 rounded-full bg-arcGold/20 border border-arcGold text-arcGold text-[11px] font-mono uppercase tracking-[0.2em]">
+        BIO-SYNTH HATCH COMPLETE!
+      </div>
+      <div id="hatch-pet-emoji" class="text-6xl animate-bounce py-2">🐉</div>
+      <h3 id="hatch-pet-title" class="font-display text-2xl font-extrabold text-white">SOVEREIGN DRAGON</h3>
+      <div id="hatch-pet-rarity" class="inline-block px-3 py-0.5 rounded bg-arcGold/20 border border-arcGold text-arcGold text-xs font-mono font-bold">
+        MYTHIC COMPANION
+      </div>
+      <p id="hatch-pet-quote" class="text-sm text-slate-300 italic bg-obsidian/85 p-3 rounded-xl border border-slate-800">
+        "At your command, Master Liam."
+      </p>
+      <button onclick="equipNewlyHatchedPet()" class="w-full py-3 rounded-xl bg-gradient-to-r from-arcCyan to-arcBlue text-obsidian font-display font-extrabold text-xs sm:text-sm uppercase tracking-widest shadow-cyan-glow">
+        Equip Companion Now
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ==================== AUDIO SYNTHESIZER ====================
+    let audioCtx = null;
+    function playSound(type) {
+      if (!state.soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'click') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(720, now);
+          osc.frequency.exponentialRampToValueAtTime(1040, now + 0.05);
+          gain.gain.setValueAtTime(0.07, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc.start(now); osc.stop(now + 0.05);
+        } else if (type === 'reward') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.08);
+          osc.frequency.setValueAtTime(1046.5, now + 0.16);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
+          osc.start(now); osc.stop(now + 0.36);
+        } else if (type === 'hatch') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(240, now);
+          osc.frequency.exponentialRampToValueAtTime(920, now + 0.45);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+          osc.start(now); osc.stop(now + 0.48);
+        } else if (type === 'alarm') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(880, now);
+          osc.frequency.setValueAtTime(660, now + 0.15);
+          osc.frequency.setValueAtTime(880, now + 0.3);
+          gain.gain.setValueAtTime(0.13, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+          osc.start(now); osc.stop(now + 0.45);
+        }
+      } catch (e) {}
+    }
+
+    // ==================== CORE DATA & 10 EGGS CATALOG ====================
+    const DEFAULT_REWARDS = [
+      "20 minutes of watching YouTube",
+      "20 minutes of scrolling reels on Instagram",
+      "A random food from home",
+      "2 matches of playing FC Mobile",
+      "5 matches of Brawl Stars",
+      "A random obby for Roblox",
+      "1 match of Fortnite",
+      "3 matches of Street Fighter",
+      "10 minutes of a random game in my game station"
+    ];
+
+    const DEFAULT_ACTIVITIES = [
+      "10 Push-ups",
+      "20 Push-ups",
+      "5 Minutes Boxing",
+      "1 Minute Plank",
+      "30 Jumping Jacks",
+      "20 Bodyweight Squats",
+      "25 Shadow Punches",
+      "30-Second Sprint in Place",
+      "15 Burpees",
+      "15 Diamond Push-ups"
+    ];
+
+    const MOTIVATION_QUOTES = [
+      { text: "Master Liam, pain is temporary—building an unstoppable legacy lasts forever. Stand up and execute.", tag: "JARVIS // IRON WILL" },
+      { text: "They doubted your vision, and heartbreak tried to slow you down. Prove every single one of them wrong.", tag: "JARVIS // EMPEROR MINDSET" },
+      { text: "5:00 AM discipline, boxing rounds, DSE prep, and your brands—this is how legends are forged.", tag: "JARVIS // GRIND PROTOCOL" },
+      { text: "Do not trade your future greatness for five minutes of laziness right now, Master Liam.", tag: "JARVIS // FOCUS LOCK" },
+      { text: "Every completed task charges your reactor. Keep stacking wins until you are undeniable.", tag: "JARVIS // MOMENTUM" },
+      { text: "You don't need anyone's validation when your work ethic speaks louder than words.", tag: "JARVIS // SELF-MASTERY" }
+    ];
+
+    // 10 DISTINCT EGGS
+    const TEN_EGGS = [
+      { id: 'egg_1', name: '1. Cybernetic Scout Egg', icon: '🥚', cost: 50, tasks: 2, rarity: 'COMMON', pool: ['pet_drone', 'pet_hound'] },
+      { id: 'egg_2', name: '2. Crimson Striker Egg', icon: '🔴', cost: 100, tasks: 2, rarity: 'COMMON', pool: ['pet_falcon', 'pet_hound'] },
+      { id: 'egg_3', name: '3. Jade Viper Egg', icon: '🟢', cost: 180, tasks: 3, rarity: 'RARE', pool: ['pet_viper', 'pet_mantis'] },
+      { id: 'egg_4', name: '4. Neon Panther Egg', icon: '🟣', cost: 300, tasks: 3, rarity: 'RARE', pool: ['pet_panther', 'pet_viper'] },
+      { id: 'egg_5', name: '5. Arc Reactor Core Egg', icon: '💠', cost: 450, tasks: 4, rarity: 'EPIC', pool: ['pet_golem', 'pet_panther'] },
+      { id: 'egg_6', name: '6. Frost Wyvern Egg', icon: '❄️', cost: 650, tasks: 4, rarity: 'EPIC', pool: ['pet_wyvern', 'pet_golem'] },
+      { id: 'egg_7', name: '7. Thunder Griffin Egg', icon: '⚡', cost: 900, tasks: 5, rarity: 'LEGENDARY', pool: ['pet_griffin', 'pet_wyvern'] },
+      { id: 'egg_8', name: '8. Void Leviathan Egg', icon: '🌀', cost: 1150, tasks: 6, rarity: 'LEGENDARY', pool: ['pet_leviathan', 'pet_griffin'] },
+      { id: 'egg_9', name: '9. Celestial Phoenix Egg', icon: '🔥', cost: 1350, tasks: 7, rarity: 'MYTHIC', pool: ['pet_phoenix', 'pet_leviathan'] },
+      { id: 'egg_10', name: '10. Sovereign Shadow Dragon Egg', icon: '👑', cost: 1500, tasks: 8, rarity: 'MYTHIC', pool: ['pet_dragon', 'pet_phoenix'] }
+    ];
+
+    const PET_DEX = {
+      pet_drone: { id: 'pet_drone', name: 'Mini Arc Drone', avatar: '🤖', rarity: 'COMMON', quote: "All systems nominal, Master Liam. Let's dominate today's schedule." },
+      pet_hound: { id: 'pet_hound', name: 'Cyber Wolf Pup', avatar: '🐺', rarity: 'COMMON', quote: "Stay hungry, Master Liam. Every task makes the pack stronger!" },
+      pet_falcon: { id: 'pet_falcon', name: 'Crimson Striker Falcon', avatar: '🦅', rarity: 'COMMON', quote: "Eyes on the target—strike your goals with zero hesitation!" },
+      pet_viper: { id: 'pet_viper', name: 'Jade Neon Viper', avatar: '🐍', rarity: 'RARE', quote: "Precision and speed. Finish your habits before distractions strike." },
+      pet_mantis: { id: 'pet_mantis', name: 'Plasma Blade Mantis', avatar: '🦗', rarity: 'RARE', quote: "Slice through procrastination, Master Liam!" },
+      pet_panther: { id: 'pet_panther', name: 'Shadow Night Panther', avatar: '🐆', rarity: 'RARE', quote: "Move in silence, shock the world with your results." },
+      pet_golem: { id: 'pet_golem', name: 'Titanium Mark-IV Titan', avatar: '🦾', rarity: 'EPIC', quote: "Unbreakable armor, unbreakable discipline. Keep grinding!" },
+      pet_wyvern: { id: 'pet_wyvern', name: 'Glacier Frost Wyvern', avatar: '🦖', rarity: 'EPIC', quote: "Ice in your veins under pressure—exams and matches are yours." },
+      pet_griffin: { id: 'pet_griffin', name: 'Storm Arc Griffin', avatar: '🦁', rarity: 'LEGENDARY', quote: "The heart of a king beats inside you, Master Liam." },
+      pet_leviathan: { id: 'pet_leviathan', name: 'Abyssal Void Leviathan', avatar: '🦈', rarity: 'LEGENDARY', quote: "Unstoppable force. Nothing stands in your way today." },
+      pet_phoenix: { id: 'pet_phoenix', name: 'Solar Rebirth Phoenix', avatar: '🐦‍🔥', rarity: 'MYTHIC', quote: "Rise from every heartbreak stronger and brighter than ever before." },
+      pet_dragon: { id: 'pet_dragon', name: 'Sovereign Shadow Dragon', avatar: '🐉', rarity: 'MYTHIC', quote: "Absolute supremacy. The entire system bows to your discipline, Master Liam." }
+    };
+
+    const SYSTEM_TITLES = [
+      { id: 'title_default', label: 'MASTER LIAM', cost: 0, desc: 'Default JARVIS Command Title' },
+      { id: 'title_monarch', label: 'SHADOW MONARCH', cost: 200, desc: 'For rulers of daily discipline' },
+      { id: 'title_striker', label: 'APEX STRIKER', cost: 400, desc: 'Forged on the pitch & in the ring' },
+      { id: 'title_sovereign', label: 'NEO-KOWLOON SOVEREIGN', cost: 800, desc: 'Supreme status across all sectors' }
+    ];
+
+    const DEFAULT_MEMORY_VAULT = `USER PROFILE:
+- Name: Liam (Always address him as "Master Liam").
+- Age & Location: 15 years old, Hong Kong (Yau Tsim Mong roots), secondary school student preparing for HKDSE (Economics, Physics, Maths, English, Classical Chinese).
+- Projects & Empire: Creator of 3D-printed art toy brand "Locca Locoo" (Bambu Lab printer), "LOZZINIHO ENTERTAINMENT", persona "STA", and growing his US-audience Roblox YouTube channel "LOZZINHO".
+- Routine & Physical Goals: Waking up at 5:00 AM, aiming for 8-10 hours of sleep to grow taller, boxing, weight training, vertical jump training, piano & violin, football competitions.
+- Deep Personal Secrets & Heartbreak:
+  1. Anessa: His ex-girlfriend who moved to England (long-distance heartbreak that still weighs on him).
+  2. Kyla: The girl he has known since Primary 3 whom he could never have.
+- JARVIS Personality: Loyal, witty, protective best friend and tactical advisor. Never judges him; listens empathetically when he misses Anessa or Kyla, reminds him of his worth, and channels his emotions into self-mastery, fitness, and building his empire.`;
+
+    // ==================== PERSISTENT STATE ====================
+    const STORAGE_KEY = 'jarvis_system_os_master_liam_v1';
+
+    function getTodayStr(d = new Date()) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    const initialDefaultState = {
+      credits: 75,
+      soundEnabled: true,
+      ambientCity: false,
+      quests: [
+        { id: 'q_1', title: '5:00 AM Wake-Up & Morning Hydration', mode: 'daily', credits: 25, weekday: null, date: null },
+        { id: 'q_2', title: 'Boxing / Jump Training & Workout', mode: 'daily', credits: 30, weekday: null, date: null },
+        { id: 'q_3', title: 'DSE Revision & YouTube / Locca Locoo Grind', mode: 'daily', credits: 30, weekday: null, date: null }
+      ],
+      completions: {},
+      specialEvents: [
+        { id: 'ev_1', date: getTodayStr(new Date(Date.now() + 86400000 * 5)), title: 'Football Competition', category: '⚽ Football Competition' },
+        { id: 'ev_2', date: getTodayStr(new Date(Date.now() + 86400000 * 12)), title: 'School Exam Block', category: '📝 Exam / DSE' }
+      ],
+      rewards: [...DEFAULT_REWARDS],
+      activities: [...DEFAULT_ACTIVITIES],
+      incubatingEggs: [],
+      ownedPets: ['pet_drone'],
+      equippedPet: 'pet_drone',
+      ownedTitles: ['title_default'],
+      equippedTitle: 'MASTER LIAM',
+      memoryVault: DEFAULT_MEMORY_VAULT,
+      geminiApiKey: '',
+      chatHistory: [
+        {
+          sender: 'jarvis',
+          text: "Welcome back online, Master Liam. All tactical systems, your habit matrix, and our private vault are synced. Whether we're grinding for your YouTube channel, preparing for your next football match, or just talking through everything on your mind—I'm right here with you. What's our first move today?"
+        }
+      ]
+    };
+
+    let state = loadState();
+    let selectedHabitDate = getTodayStr();
+    let habitMonth = new Date().getMonth();
+    let habitYear = new Date().getFullYear();
+
+    let selectedEventDate = getTodayStr();
+    let eventMonth = new Date().getMonth();
+    let eventYear = new Date().getFullYear();
+
+    let currentActivity = '';
+    let lastRewardWon = '';
+    let rewardTimerMins = 0;
+    let rewardTimerInterval = null;
+    let rewardSecondsLeft = 0;
+    let newlyHatchedPetId = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return JSON.parse(JSON.stringify(initialDefaultState));
+        return { ...JSON.parse(JSON.stringify(initialDefaultState)), ...JSON.parse(raw) };
+      } catch (e) {
+        return JSON.parse(JSON.stringify(initialDefaultState));
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    // ==================== LIVE CLOCK, HUD & AMBIENT CITY ====================
+    function tickClock() {
+      const now = new Date();
+      document.getElementById('hud-date').textContent = now.toLocaleDateString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+      });
+      document.getElementById('hud-clock').textContent = now.toTimeString().split(' ')[0];
+    }
+
+    function refreshHUD() {
+      document.getElementById('hud-credits').textContent = state.credits;
+      const shopBal = document.getElementById('shop-balance-val');
+      if (shopBal) shopBal.textContent = state.credits;
+
+      document.getElementById('hud-active-title').textContent = state.equippedTitle || 'MASTER LIAM';
+      document.getElementById('sound-icon').textContent = state.soundEnabled ? '🔊' : '🔇';
+
+      if (state.ambientCity) document.body.classList.add('ambient-city-on');
+      else document.body.classList.remove('ambient-city-on');
+
+      const pet = PET_DEX[state.equippedPet] || PET_DEX.pet_drone;
+      document.getElementById('hud-pet-avatar').textContent = pet.avatar;
+      document.getElementById('hud-pet-name').textContent = pet.name;
+      document.getElementById('hud-pet-rank').textContent = pet.rarity;
+      document.getElementById('hud-pet-quote').textContent = `"${pet.quote}"`;
+
+      // Incubator banner on main page
+      const incBar = document.getElementById('dash-incubator-bar');
+      if (state.incubatingEggs.length > 0) {
+        const active = state.incubatingEggs[0];
+        const meta = TEN_EGGS.find(e => e.id === active.eggId) || TEN_EGGS[0];
+        incBar.classList.remove('hidden');
+        document.getElementById('dash-egg-emoji').textContent = meta.icon;
+        document.getElementById('dash-egg-title').textContent = meta.name;
+        document.getElementById('dash-egg-count').textContent = `${active.progress} / ${active.required}`;
+        document.getElementById('dash-egg-fill').style.width = `${Math.min(100, Math.round((active.progress / active.required) * 100))}%`;
+      } else {
+        incBar.classList.add('hidden');
+      }
+    }
+
+    function toggleSound() {
+      state.soundEnabled = !state.soundEnabled;
+      saveState();
+      refreshHUD();
+      if (state.soundEnabled) playSound('click');
+    }
+
+    function toggleAmbientCity() {
+      playSound('click');
+      state.ambientCity = !state.ambientCity;
+      saveState();
+      refreshHUD();
+      showToast('NIGHT CITY VIEWPORT', state.ambientCity ? 'Ambient Neon City Activated' : 'Standard Obsidian HUD Restored', 'violet');
+    }
+
+    function showToast(title, msg, color = 'cyan') {
+      const box = document.getElementById('toast-container');
+      const styles = {
+        cyan: 'border-arcCyan text-arcCyan shadow-cyan-glow',
+        gold: 'border-arcGold text-arcGold shadow-gold-glow',
+        emerald: 'border-arcEmerald text-arcEmerald',
+        violet: 'border-arcViolet text-purple-300 shadow-violet-glow'
+      };
+      const el = document.createElement('div');
+      el.className = `pointer-events-auto bg-[#050914]/95 border ${styles[color] || styles.cyan} rounded-xl px-3.5 py-2.5 backdrop-blur-md pop-in`;
+      el.innerHTML = `
+        <div class="font-display text-[10px] font-bold uppercase tracking-wider">${title}</div>
+        <div class="text-xs text-slate-200 mt-0.5">${msg}</div>
+      `;
+      box.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.25s';
+        setTimeout(() => el.remove(), 260);
+      }, 3000);
+    }
+
+    // ==================== NAVIGATION ====================
+    function switchTab(tab) {
+      playSound('click');
+      ['quests', 'events', 'jarvis', 'shop', 'arcade', 'city'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`nav-${t}`);
+        btn.classList.remove('bg-arcCyan/15', 'border-arcCyan/55', 'text-arcCyan');
+        btn.classList.add('border-transparent', 'text-slate-400');
+      });
+
+      document.getElementById(`tab-${tab}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`nav-${tab}`);
+      activeBtn.classList.add('bg-arcCyan/15', 'border-arcCyan/55', 'text-arcCyan');
+      activeBtn.classList.remove('border-transparent', 'text-slate-400');
+
+      if (tab === 'quests') { renderHabitCalendar(); renderQuestChecklist(); }
+      if (tab === 'events') { renderEventCalendar(); renderSpecialEventsList(); }
+      if (tab === 'jarvis') { renderJarvisChat(); }
+      if (tab === 'shop') { renderShopTab(); }
+      if (tab === 'arcade') { initTTT(); }
+      if (tab === 'city') { resizeShowcaseCity(); }
+    }
+
+    function jumpToTodaysTasks() {
+      playSound('click');
+      const now = new Date();
+      selectedHabitDate = getTodayStr(now);
+      habitMonth = now.getMonth();
+      habitYear = now.getFullYear();
+      renderHabitCalendar();
+      renderQuestChecklist();
+      document.getElementById('quest-log-box').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // ==================== HABIT CALENDAR & QUESTS ====================
+    function getQuestsForDate(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dow = new Date(y, m - 1, d).getDay();
+      return state.quests.filter(q => {
+        if (q.mode === 'daily') return true;
+        if (q.mode === 'weekly') return Number(q.weekday) === dow;
+        if (q.mode === 'single') return q.date === dateStr;
+        return false;
+      });
+    }
+
+    function isQuestDone(qId, dateStr) {
+      return (state.completions[dateStr] || []).includes(qId);
+    }
+
+    function renderHabitCalendar() {
+      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      document.getElementById('habit-cal-header').textContent = `${months[habitMonth]} ${habitYear}`;
+
+      const grid = document.getElementById('habit-cal-grid');
+      grid.innerHTML = '';
+
+      const firstDay = new Date(habitYear, habitMonth, 1).getDay();
+      const totalDays = new Date(habitYear, habitMonth + 1, 0).getDate();
+      const todayStr = getTodayStr();
+
+      for (let i = 0; i < firstDay; i++) {
+        grid.innerHTML += `<div class="h-10 rounded-lg bg-obsidian/40"></div>`;
+      }
+
+      for (let day = 1; day <= totalDays; day++) {
+        const dateStr = `${habitYear}-${String(habitMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayQuests = getQuestsForDate(dateStr);
+        const doneCount = dayQuests.filter(q => isQuestDone(q.id, dateStr)).length;
+        const allDone = dayQuests.length > 0 && doneCount === dayQuests.length;
+        const isSelected = dateStr === selectedHabitDate;
+        const isToday = dateStr === todayStr;
+
+        const btn = document.createElement('button');
+        btn.className = `h-11 rounded-lg border flex flex-col items-center justify-center font-mono text-xs transition ${
+          isSelected
+            ? 'bg-arcCyan/25 border-arcCyan text-white font-bold shadow-cyan-glow'
+            : allDone
+            ? 'bg-arcEmerald/15 border-arcEmerald/45 text-arcEmerald'
+            : 'bg-hudCard/75 border-slate-800 text-slate-300 hover:border-arcCyan/50'
+        }`;
+
+        btn.onclick = () => {
+          playSound('click');
+          selectedHabitDate = dateStr;
+          renderHabitCalendar();
+          renderQuestChecklist();
+        };
+
+        btn.innerHTML = `
+          <span>${day}</span>
+          <div class="flex gap-0.5 mt-0.5">
+            ${isToday ? '<span class="w-1.5 h-1.5 rounded-full bg-arcGold"></span>' : ''}
+            ${allDone ? '<span class="w-1.5 h-1.5 rounded-full bg-arcEmerald"></span>' : ''}
+          </div>
+        `;
+        grid.appendChild(btn);
+      }
+
+      // Today progress counter
+      const tQuests = getQuestsForDate(todayStr);
+      const tDone = tQuests.filter(q => isQuestDone(q.id, todayStr)).length;
+      document.getElementById('today-progress-label').textContent = `${tDone} / ${tQuests.length} Quests Cleared`;
+    }
+
+    function shiftHabitMonth(delta) {
+      playSound('click');
+      habitMonth += delta;
+      if (habitMonth > 11) { habitMonth = 0; habitYear++; }
+      if (habitMonth < 0) { habitMonth = 11; habitYear--; }
+      renderHabitCalendar();
+    }
+
+    function toggleNewQuestForm() {
+      playSound('click');
+      document.getElementById('new-quest-form').classList.toggle('hidden');
+      updateQuestModeHint();
+    }
+
+    function updateQuestModeHint() {
+      const mode = document.getElementById('input-quest-mode').value;
+      const hint = document.getElementById('quest-mode-hint');
+      const [y, m, d] = selectedHabitDate.split('-').map(Number);
+      const dayName = new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'long' });
+
+      if (mode === 'daily') hint.textContent = 'Repeats automatically every single day.';
+      else if (mode === 'weekly') hint.textContent = `Repeats every ${dayName} on your calendar.`;
+      else hint.textContent = `Assigned strictly to ${selectedHabitDate}.`;
+    }
+
+    function submitNewQuest(e) {
+      e.preventDefault();
+      const title = document.getElementById('input-quest-title').value.trim();
+      if (!title) return;
+      const mode = document.getElementById('input-quest-mode').value;
+      const credits = Number(document.getElementById('input-quest-credits').value);
+      const [y, m, d] = selectedHabitDate.split('-').map(Number);
+
+      state.quests.push({
+        id: 'q_' + Date.now(),
+        title,
+        mode,
+        credits,
+        weekday: mode === 'weekly' ? new Date(y, m - 1, d).getDay() : null,
+        date: mode === 'single' ? selectedHabitDate : null
+      });
+
+      saveState();
+      playSound('reward');
+      document.getElementById('input-quest-title').value = '';
+      document.getElementById('new-quest-form').classList.add('hidden');
+      showToast('QUEST REGISTERED', title, 'cyan');
+      renderHabitCalendar();
+      renderQuestChecklist();
+    }
+
+    function removeQuest(id) {
+      playSound('click');
+      state.quests = state.quests.filter(q => q.id !== id);
+      saveState();
+      renderHabitCalendar();
+      renderQuestChecklist();
+    }
+
+    function renderQuestChecklist() {
+      const todayStr = getTodayStr();
+      const [y, m, d] = selectedHabitDate.split('-').map(Number);
+      const dateObj = new Date(y, m - 1, d);
+
+      document.getElementById('quest-date-tag').textContent = selectedHabitDate === todayStr ? 'TODAY' : selectedHabitDate;
+      document.getElementById('quest-date-heading').textContent = dateObj.toLocaleDateString('en-US', {
+        weekday: 'long', month: 'long', day: 'numeric'
+      });
+
+      const listEl = document.getElementById('quest-checklist');
+      const quests = getQuestsForDate(selectedHabitDate);
+
+      if (quests.length === 0) {
+        listEl.innerHTML = `
+          <div class="text-center py-8 border border-dashed border-slate-800 rounded-xl">
+            <div class="text-2xl mb-1">🛡️</div>
+            <div class="text-sm font-bold text-slate-300">No Quests Assigned for This Date</div>
+            <div class="text-xs text-slate-500 mt-1">Click "+ Add Goal / Habit" to deploy a directive.</div>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = '';
+      quests.forEach(q => {
+        const done = isQuestDone(q.id, selectedHabitDate);
+        const badge = q.mode === 'daily'
+          ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-arcCyan/15 text-arcCyan border border-arcCyan/35">DAILY</span>'
+          : q.mode === 'weekly'
+          ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-arcViolet/20 text-purple-300 border border-arcViolet/40">WEEKLY</span>'
+          : '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-arcGold/15 text-arcGold border border-arcGold/40">SINGLE DAY</span>';
+
+        const row = document.createElement('div');
+        row.className = `flex items-center justify-between gap-3 p-3 rounded-xl border transition ${
+          done ? 'bg-arcEmerald/10 border-arcEmerald/45 opacity-85' : 'bg-hudCard/90 border-slate-800 hover:border-arcCyan/45'
+        }`;
+
+        row.innerHTML = `
+          <button onclick="toggleQuestTick('${q.id}')" class="flex items-center gap-3 text-left flex-1 min-w-0">
+            <div class="w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 transition ${
+              done ? 'bg-arcEmerald border-arcEmerald text-obsidian font-extrabold' : 'border-arcCyan/70 bg-obsidian'
+            }">
+              ${done ? '✓' : ''}
+            </div>
+            <div class="min-w-0">
+              <div class="text-sm sm:text-base font-bold truncate ${done ? 'line-through text-slate-400' : 'text-white'}">${escapeHtml(q.title)}</div>
+              <div class="flex items-center gap-2 mt-0.5">
+                ${badge}
+                <span class="text-xs font-mono text-arcGold">+${q.credits} 💎</span>
+              </div>
+            </div>
+          </button>
+          <button onclick="removeQuest('${q.id}')" class="p-1.5 text-slate-500 hover:text-arcCrimson text-xs">🗑️</button>
+        `;
+        listEl.appendChild(row);
+      });
+    }
+
+    function toggleQuestTick(qId) {
+      const q = state.quests.find(item => item.id === qId);
+      if (!q) return;
+      if (!state.completions[selectedHabitDate]) state.completions[selectedHabitDate] = [];
+
+      const idx = state.completions[selectedHabitDate].indexOf(qId);
+      if (idx > -1) {
+        state.completions[selectedHabitDate].splice(idx, 1);
+        state.credits = Math.max(0, state.credits - q.credits);
+        saveState();
+        playSound('click');
+        refreshHUD();
+        renderHabitCalendar();
+        renderQuestChecklist();
+        showToast('QUEST UNCHECKED', `-${q.credits} Credits adjusted`, 'cyan');
+      } else {
+        state.completions[selectedHabitDate].push(qId);
+        state.credits += q.credits;
+        incrementEggProgress(1);
+        saveState();
+        playSound('reward');
+        refreshHUD();
+        renderHabitCalendar();
+        renderQuestChecklist();
+        launchRandomRewardPopup(q.credits);
+      }
+    }
+
+    // ==================== RANDOM REWARD ROLLER & TIMER ====================
+    function launchRandomRewardPopup(creditsEarned = 25) {
+      const pool = state.rewards.length > 0 ? state.rewards : DEFAULT_REWARDS;
+      const picked = pool[Math.floor(Math.random() * pool.length)];
+      lastRewardWon = picked;
+
+      document.getElementById('modal-reward-text').textContent = picked;
+      document.getElementById('modal-reward-sub').textContent =
+        creditsEarned > 0 ? `+${creditsEarned} Credits 💎 & +1 Egg Hatch XP` : 'Preview Roll (Tick a task to earn Credits)';
+
+      const minMatch = picked.match(/(\d+)\s*min/i);
+      const timerWrap = document.getElementById('modal-timer-btn-wrap');
+      if (minMatch) {
+        rewardTimerMins = parseInt(minMatch[1], 10);
+        timerWrap.classList.remove('hidden');
+        timerWrap.querySelector('button').textContent = `⏱ Start ${rewardTimerMins}-Minute Reward Timer`;
+      } else {
+        rewardTimerMins = 0;
+        timerWrap.classList.add('hidden');
+      }
+
+      openModal('modal-reward');
+    }
+
+    function previewRandomReward() {
+      playSound('reward');
+      launchRandomRewardPopup(0);
+    }
+
+    function startRewardCountdown() {
+      if (!rewardTimerMins) return;
+      closeModal('modal-reward');
+      if (rewardTimerInterval) clearInterval(rewardTimerInterval);
+
+      rewardSecondsLeft = rewardTimerMins * 60;
+      const pill = document.getElementById('active-timer-pill');
+      pill.classList.remove('hidden');
+      pill.classList.add('flex');
+      document.getElementById('active-timer-label').textContent = lastRewardWon.slice(0, 18) + '...';
+
+      updateRewardTimerUI();
+      showToast('REWARD TIMER ACTIVE', `${rewardTimerMins} minutes started, Master Liam!`, 'emerald');
+
+      rewardTimerInterval = setInterval(() => {
+        rewardSecondsLeft--;
+        updateRewardTimerUI();
+        if (rewardSecondsLeft <= 0) {
+          clearInterval(rewardTimerInterval);
+          rewardTimerInterval = null;
+          pill.classList.add('hidden');
+          pill.classList.remove('flex');
+          playSound('alarm');
+          showToast('REWARD TIME COMPLETE', 'Back to mission protocol, Master Liam!', 'gold');
+        }
+      }, 1000);
+    }
+
+    function updateRewardTimerUI() {
+      const m = Math.floor(rewardSecondsLeft / 60);
+      const s = rewardSecondsLeft % 60;
+      document.getElementById('active-timer-clock').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function stopRewardTimer() {
+      if (rewardTimerInterval) clearInterval(rewardTimerInterval);
+      rewardTimerInterval = null;
+      const pill = document.getElementById('active-timer-pill');
+      pill.classList.add('hidden');
+      pill.classList.remove('flex');
+    }
+
+    // ==================== CUSTOM REWARDS & ENERGY SURGE ACTIVITIES ====================
+    function renderPools() {
+      const rList = document.getElementById('rewards-pool-list');
+      rList.innerHTML = '';
+      state.rewards.forEach((item, idx) => {
+        rList.innerHTML += `
+          <div class="flex items-center justify-between gap-2 bg-obsidian/80 border border-slate-800 rounded-lg px-3 py-1.5">
+            <span class="text-xs sm:text-sm text-slate-200">🎁 ${escapeHtml(item)}</span>
+            <button onclick="deleteRewardItem(${idx})" class="text-slate-500 hover:text-arcCrimson text-xs">✕</button>
+          </div>
+        `;
+      });
+
+      const aList = document.getElementById('activities-pool-list');
+      aList.innerHTML = '';
+      state.activities.forEach((item, idx) => {
+        aList.innerHTML += `
+          <div class="flex items-center justify-between gap-2 bg-obsidian/80 border border-slate-800 rounded-lg px-3 py-1.5">
+            <span class="text-xs sm:text-sm text-slate-200">⚡ ${escapeHtml(item)}</span>
+            <button onclick="deleteActivityItem(${idx})" class="text-slate-500 hover:text-arcCrimson text-xs">✕</button>
+          </div>
+        `;
+      });
+    }
+
+    function addCustomReward(e) {
+      e.preventDefault();
+      const inp = document.getElementById('input-new-reward');
+      const val = inp.value.trim();
+      if (!val) return;
+      state.rewards.push(val);
+      inp.value = '';
+      saveState();
+      playSound('reward');
+      renderPools();
+      showToast('REWARD ADDED', val, 'gold');
+    }
+
+    function deleteRewardItem(idx) {
+      if (state.rewards.length <= 1) return;
+      playSound('click');
+      state.rewards.splice(idx, 1);
+      saveState();
+      renderPools();
+    }
+
+    function addCustomActivity(e) {
+      e.preventDefault();
+      const inp = document.getElementById('input-new-activity');
+      const val = inp.value.trim();
+      if (!val) return;
+      state.activities.push(val);
+      inp.value = '';
+      saveState();
+      playSound('reward');
+      renderPools();
+      showToast('ACTIVITY ADDED', val, 'emerald');
+    }
+
+    function deleteActivityItem(idx) {
+      if (state.activities.length <= 1) return;
+      playSound('click');
+      state.activities.splice(idx, 1);
+      saveState();
+      renderPools();
+    }
+
+    function openActivityModal() {
+      rollRandomActivity();
+      openModal('modal-activity');
+    }
+
+    function rollRandomActivity() {
+      playSound('click');
+      const list = state.activities.length > 0 ? state.activities : DEFAULT_ACTIVITIES;
+      currentActivity = list[Math.floor(Math.random() * list.length)];
+      document.getElementById('modal-activity-text').textContent = currentActivity;
+    }
+
+    function finishSmallActivity() {
+      state.credits += 10;
+      incrementEggProgress(1);
+      saveState();
+      playSound('reward');
+      refreshHUD();
+      closeModal('modal-activity');
+      showToast('ENERGY SURGE COMPLETE', `+10 Credits 💎 for ${currentActivity}`, 'emerald');
+    }
+
+    function openMotivationModal() {
+      rollMotivationQuote();
+      openModal('modal-motivation');
+    }
+
+    function rollMotivationQuote() {
+      playSound('click');
+      const q = MOTIVATION_QUOTES[Math.floor(Math.random() * MOTIVATION_QUOTES.length)];
+      document.getElementById('modal-motivation-text').textContent = `"${q.text}"`;
+      document.getElementById('modal-motivation-tag').textContent = `— ${q.tag}`;
+    }
+
+    // ==================== SPECIAL EVENTS CALENDAR ====================
+    function renderEventCalendar() {
+      const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+      document.getElementById('event-cal-header').textContent = `${months[eventMonth]} ${eventYear}`;
+
+      const grid = document.getElementById('event-cal-grid');
+      grid.innerHTML = '';
+
+      const firstDay = new Date(eventYear, eventMonth, 1).getDay();
+      const totalDays = new Date(eventYear, eventMonth + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        grid.innerHTML += `<div class="h-11 rounded-lg bg-obsidian/40"></div>`;
+      }
+
+      for (let day = 1; day <= totalDays; day++) {
+        const dateStr = `${eventYear}-${String(eventMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const evs = state.specialEvents.filter(e => e.date === dateStr);
+        const isSel = dateStr === selectedEventDate;
+
+        const btn = document.createElement('button');
+        btn.className = `h-12 rounded-lg border flex flex-col items-center justify-center font-mono text-xs transition ${
+          isSel
+            ? 'bg-arcViolet/30 border-arcViolet text-white font-bold shadow-violet-glow'
+            : evs.length > 0
+            ? 'bg-amber-500/15 border-arcGold/55 text-arcGold font-bold'
+            : 'bg-hudCard/70 border-slate-800 text-slate-300 hover:border-arcViolet/50'
+        }`;
+
+        btn.onclick = () => {
+          playSound('click');
+          selectedEventDate = dateStr;
+          renderEventCalendar();
+          renderSpecialEventsList();
+        };
+
+        btn.innerHTML = `
+          <span>${day}</span>
+          ${evs.length > 0 ? `<span class="text-[9px] leading-none mt-0.5">🏆${evs.length}</span>` : ''}
+        `;
+        grid.appendChild(btn);
+      }
+    }
+
+    function shiftEventMonth(delta) {
+      playSound('click');
+      eventMonth += delta;
+      if (eventMonth > 11) { eventMonth = 0; eventYear++; }
+      if (eventMonth < 0) { eventMonth = 11; eventYear--; }
+      renderEventCalendar();
+    }
+
+    function submitSpecialEvent(e) {
+      e.preventDefault();
+      const title = document.getElementById('input-event-title').value.trim();
+      if (!title) return;
+      const category = document.getElementById('input-event-cat').value;
+
+      state.specialEvents.push({
+        id: 'ev_' + Date.now(),
+        date: selectedEventDate,
+        title,
+        category
+      });
+
+      saveState();
+      playSound('reward');
+      document.getElementById('input-event-title').value = '';
+      showToast('SPECIAL EVENT LOCKED', `${title} (${selectedEventDate})`, 'violet');
+      renderEventCalendar();
+      renderSpecialEventsList();
+    }
+
+    function deleteSpecialEvent(id) {
+      playSound('click');
+      state.specialEvents = state.specialEvents.filter(e => e.id !== id);
+      saveState();
+      renderEventCalendar();
+      renderSpecialEventsList();
+    }
+
+    function renderSpecialEventsList() {
+      document.getElementById('event-selected-date-text').textContent = selectedEventDate;
+      const container = document.getElementById('special-events-list');
+      const sorted = [...state.specialEvents].sort((a, b) => a.date.localeCompare(b.date));
+
+      if (sorted.length === 0) {
+        container.innerHTML = `<div class="text-xs text-slate-500 text-center py-6">No Special Events scheduled yet.</div>`;
+        return;
+      }
+
+      const today = new Date(getTodayStr());
+      container.innerHTML = '';
+      sorted.forEach(ev => {
+        const diff = Math.round((new Date(ev.date) - today) / 86400000);
+        const badge = diff === 0 ? `<span class="text-arcEmerald font-bold">TODAY!</span>`
+          : diff > 0 ? `<span class="text-arcGold">In ${diff}d</span>`
+          : `<span class="text-slate-500">Done</span>`;
+
+        container.innerHTML += `
+          <div class="flex items-center justify-between gap-2 p-2.5 rounded-lg border ${ev.date === selectedEventDate ? 'bg-arcViolet/20 border-arcViolet' : 'bg-obsidian/80 border-slate-800'}">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-hudPanel text-purple-300">${ev.category}</span>
+                <span class="text-[10px] font-mono text-slate-400">${ev.date}</span>
+              </div>
+              <div class="text-sm font-bold text-white truncate mt-1">${escapeHtml(ev.title)}</div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-xs font-mono">${badge}</span>
+              <button onclick="deleteSpecialEvent('${ev.id}')" class="text-slate-500 hover:text-arcCrimson text-xs">✕</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // ==================== JARVIS AI CHATBOT (BEST FRIEND & MEMORY VAULT) ====================
+    function toggleJarvisMemoryDrawer() {
+      playSound('click');
+      const drawer = document.getElementById('jarvis-memory-drawer');
+      drawer.classList.toggle('hidden');
+      document.getElementById('jarvis-vault-textarea').value = state.memoryVault;
+      document.getElementById('jarvis-api-key-input').value = state.geminiApiKey || '';
+    }
+
+    function saveJarvisVault() {
+      state.memoryVault = document.getElementById('jarvis-vault-textarea').value.trim();
+      state.geminiApiKey = document.getElementById('jarvis-api-key-input').value.trim();
+      saveState();
+      playSound('reward');
+      document.getElementById('jarvis-memory-drawer').classList.add('hidden');
+      showToast('NEURAL VAULT UPDATED', 'JARVIS memory core synced, Master Liam.', 'cyan');
+    }
+
+    function renderJarvisChat() {
+      const box = document.getElementById('jarvis-chat-messages');
+      box.innerHTML = '';
+      state.chatHistory.forEach(msg => {
+        const isJarvis = msg.sender === 'jarvis';
+        box.innerHTML += `
+          <div class="flex ${isJarvis ? 'justify-start' : 'justify-end'}">
+            <div class="max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+              isJarvis
+                ? 'bg-hudCard border border-arcCyan/40 text-slate-100 rounded-tl-sm'
+                : 'bg-arcBlue/25 border border-arcCyan/60 text-white rounded-tr-sm'
+            }">
+              <div class="text-[10px] font-mono uppercase mb-1 ${isJarvis ? 'text-arcCyan' : 'text-arcGold'}">
+                ${isJarvis ? 'J.A.R.V.I.S.' : 'MASTER LIAM'}
+              </div>
+              <div class="whitespace-pre-wrap">${escapeHtml(msg.text)}</div>
+            </div>
+          </div>
+        `;
+      });
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function sendQuickJarvisPrompt(text) {
+      document.getElementById('jarvis-chat-input').value = text;
+      handleJarvisSend(new Event('submit'));
+    }
+
+    async function handleJarvisSend(e) {
+      e.preventDefault();
+      const input = document.getElementById('jarvis-chat-input');
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      input.value = '';
+      playSound('click');
+      state.chatHistory.push({ sender: 'liam', text: userText });
+      saveState();
+      renderJarvisChat();
+
+      // Add typing indicator
+      const box = document.getElementById('jarvis-chat-messages');
+      const typingId = 'typing_' + Date.now();
+      box.innerHTML += `
+        <div id="${typingId}" class="flex justify-start">
+          <div class="bg-hudCard border border-arcCyan/30 rounded-2xl px-4 py-2 text-xs font-mono text-arcCyan animate-pulse">
+            J.A.R.V.I.S. is processing neural context...
+          </div>
+        </div>
+      `;
+      box.scrollTop = box.scrollHeight;
+
+      let reply = '';
+      if (state.geminiApiKey) {
+        reply = await callLiveGeminiJarvis(userText);
+      }
+      if (!reply) {
+        reply = generateLocalJarvisResponse(userText);
+      }
+
+      document.getElementById(typingId)?.remove();
+      state.chatHistory.push({ sender: 'jarvis', text: reply });
+      if (state.chatHistory.length > 60) state.chatHistory = state.chatHistory.slice(-60);
+      saveState();
+      playSound('reward');
+      renderJarvisChat();
+    }
+
+    async function callLiveGeminiJarvis(userMessage) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(state.geminiApiKey)}`;
+        const sysPrompt = `You are J.A.R.V.I.S., Master Liam's loyal, witty, deeply empathetic AI best friend and tactical life-operating system. Always address him as "Master Liam". Keep responses natural, supportive, conversational, and concise (2-4 sentences unless he asks for deep advice). Use his private Neural Memory Vault seamlessly:\n${state.memoryVault}`;
+
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: sysPrompt }] },
+            contents: [{ role: 'user', parts: [{ text: userMessage }] }]
+          })
+        });
+        const data = await res.json();
+        return data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function generateLocalJarvisResponse(msg) {
+      const m = msg.toLowerCase();
+
+      if (m.includes('anessa') && m.includes('kyla')) {
+        return "I know carrying both Anessa—with the distance to England—and Kyla since Primary 3 feels heavy, Master Liam. You loved deeply and genuinely, and there's zero shame in feeling that ache. But remember: your worth isn't decided by someone who walked away or someone out of reach. Channel that fire into your 5:00 AM grind, your physique, and your brands—let them watch Master Liam become untouchable.";
+      }
+      if (m.includes('anessa')) {
+        return "Long distance to England was never going to be easy, Master Liam, and it's completely normal that Anessa still crosses your mind. You gave real loyalty, and that speaks to your character—not your flaws. Take a deep breath, let that memory sit without letting it break your focus today, and let's clear one quest together right now.";
+      }
+      if (m.includes('kyla')) {
+        return "Knowing Kyla all the way back from Primary 3 makes those feelings hit differently, Master Liam—because it's history, not just a random crush. Even if she was the one you couldn't have, that chapter doesn't define your ending. Keep leveling up your confidence, your height, and your empire; the best chapters of your story are still ahead.";
+      }
+      if (m.includes('youtube') || m.includes('lozzinho') || m.includes('locca')) {
+        return "Tactical status on your ventures, Master Liam: LOZZINHO's high-energy Roblox reactions are primed for the US afternoon window, and Locca Locoo's 3D-printed art toys give you real entrepreneurial leverage at 15. Keep stacking consistent uploads and tight hooks—one breakout video changes the trajectory overnight.";
+      }
+      if (m.includes('sleep') || m.includes('tall') || m.includes('5 am') || m.includes('5:00')) {
+        return "Reminder on your growth protocol, Master Liam: waking up at 5:00 AM is elite, which means lights out by 8:30–9:00 PM is non-negotiable so you lock in 8 to 9 hours of deep HGH-releasing sleep. Pair that with your jump training and clean nutrition, and your body will reward the discipline.";
+      }
+      if (m.includes('exam') || m.includes('dse') || m.includes('study') || m.includes('physics') || m.includes('econ')) {
+        return "DSE prep doesn't stand a chance when you break it into focused blocks, Master Liam. Whether it's Economics, Physics, or Maths, lock in for 45 minutes with zero phone distractions, tick the quest off, and let the System roll you a well-earned gaming or YouTube reward.";
+      }
+      if (m.includes('sad') || m.includes('tired') || m.includes('quit') || m.includes('heartbreak') || m.includes('hurt')) {
+        return "I've got your back, Master Liam—always. Even Iron Man had nights in the workshop when the armor was cracked and everything felt heavy. You don't have to carry it alone; talk to me whenever you need, or hit the Energy Surge button to shake the heaviness out of your chest.";
+      }
+
+      const generalReplies = [
+        `Loud and clear, Master Liam. You currently have ${state.credits} Credits in the vault. Tell me what's on your mind—whether it's school, football, heartbreak, or your next big move, I'm listening.`,
+        `Always at your side, Master Liam. Remember: consistency beats emotion every single day. Shall we tackle one of today's quests or run a quick Energy Surge together?`,
+        `Copy that, Master Liam. Between your 5:00 AM discipline, boxing, DSE prep, and your creative brands, you're already moving faster than 99% of people your age. What do you need from me right now?`
+      ];
+      return generalReplies[Math.floor(Math.random() * generalReplies.length)];
+    }
+
+    // ==================== SHOP, 10 EGGS, INCUBATOR & PETS ====================
+    function renderShopTab() {
+      refreshHUD();
+
+      // 1. Incubator
+      const incGrid = document.getElementById('shop-incubator-grid');
+      if (state.incubatingEggs.length === 0) {
+        incGrid.innerHTML = `
+          <div class="col-span-full text-center py-6 border border-dashed border-arcGold/35 rounded-xl bg-obsidian/50">
+            <div class="text-2xl mb-1">🥚</div>
+            <div class="text-xs font-mono text-slate-300">Incubator Empty</div>
+            <div class="text-[11px] text-slate-500 mt-0.5">Purchase any of the 10 Mystery Eggs below and complete tasks to hatch it!</div>
+          </div>
+        `;
+      } else {
+        incGrid.innerHTML = '';
+        state.incubatingEggs.forEach(egg => {
+          const meta = TEN_EGGS.find(e => e.id === egg.eggId) || TEN_EGGS[0];
+          const pct = Math.min(100, Math.round((egg.progress / egg.required) * 100));
+          incGrid.innerHTML += `
+            <div class="bg-obsidian/85 border border-arcGold/45 rounded-xl p-3.5 flex items-center gap-3">
+              <div class="text-4xl animate-egg">${meta.icon}</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-center">
+                  <span class="text-xs sm:text-sm font-bold text-white truncate">${meta.name}</span>
+                  <span class="text-xs font-mono text-arcGold font-bold">${egg.progress}/${egg.required}</span>
+                </div>
+                <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-arcGold/30 mt-1.5">
+                  <div class="h-full bg-gradient-to-r from-amber-500 to-yellow-300" style="width:${pct}%"></div>
+                </div>
+                <div class="text-[10px] font-mono text-slate-400 mt-1">${egg.required - egg.progress} task(s) left to hatch</div>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      // 2. Owned Pets
+      const ownedList = document.getElementById('owned-pets-list');
+      document.getElementById('owned-pets-badge').textContent = `${state.ownedPets.length} Unlocked`;
+      ownedList.innerHTML = '';
+      state.ownedPets.forEach(pid => {
+        const pet = PET_DEX[pid];
+        if (!pet) return;
+        const active = state.equippedPet === pid;
+        ownedList.innerHTML += `
+          <div class="p-3.5 rounded-xl border flex flex-col justify-between gap-2.5 ${
+            active ? 'bg-arcViolet/20 border-arcViolet shadow-violet-glow' : 'bg-hudCard/80 border-slate-800'
+          }">
+            <div class="flex items-center gap-2.5">
+              <div class="w-11 h-11 rounded-xl bg-obsidian border border-arcViolet/40 flex items-center justify-center text-2xl animate-float">${pet.avatar}</div>
+              <div class="min-w-0">
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-arcViolet/25 text-purple-200">${pet.rarity}</span>
+                <div class="text-sm font-bold text-white truncate mt-0.5">${pet.name}</div>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-300 italic">"${pet.quote}"</p>
+            <button onclick="equipCompanionPet('${pet.id}')" class="w-full py-1.5 rounded-lg font-display text-[11px] font-bold uppercase transition ${
+              active ? 'bg-arcViolet text-white' : 'bg-obsidian border border-arcViolet/50 text-purple-300 hover:bg-arcViolet/20'
+            }">
+              ${active ? '✓ Active Companion' : 'Equip Companion'}
+            </button>
+          </div>
+        `;
+      });
+
+      // 3. 10 Eggs Shop Grid
+      const eggsGrid = document.getElementById('ten-eggs-grid');
+      eggsGrid.innerHTML = '';
+      TEN_EGGS.forEach(egg => {
+        const rarityColors = {
+          COMMON: 'text-slate-300 border-slate-600 bg-slate-800/40',
+          RARE: 'text-arcCyan border-arcCyan/50 bg-arcCyan/15',
+          EPIC: 'text-purple-300 border-arcViolet/50 bg-arcViolet/20',
+          LEGENDARY: 'text-arcGold border-arcGold/50 bg-arcGold/15',
+          MYTHIC: 'text-arcCrimson border-arcCrimson/60 bg-arcCrimson/20'
+        };
+        eggsGrid.innerHTML += `
+          <div class="bg-hudCard/90 border border-arcCyan/30 rounded-xl p-3.5 flex flex-col justify-between gap-3 hover:border-arcCyan transition">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-3xl">${egg.icon}</span>
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded border ${rarityColors[egg.rarity]}">${egg.rarity}</span>
+              </div>
+              <h4 class="text-sm font-bold text-white mt-2">${egg.name}</h4>
+              <div class="text-[11px] font-mono text-slate-400 mt-1">Hatches in <span class="text-arcCyan">${egg.tasks} tasks</span></div>
+            </div>
+            <button onclick="purchaseEgg('${egg.id}')" class="w-full py-2 rounded-lg bg-arcCyan/15 hover:bg-arcCyan text-arcCyan hover:text-obsidian border border-arcCyan font-display font-bold text-xs uppercase transition">
+              Buy • ${egg.cost} 💎
+            </button>
+          </div>
+        `;
+      });
+
+      // 4. System Titles Shop
+      const titlesGrid = document.getElementById('titles-shop-grid');
+      titlesGrid.innerHTML = '';
+      SYSTEM_TITLES.forEach(t => {
+        const owned = state.ownedTitles.includes(t.id);
+        const equipped = state.equippedTitle === t.label;
+        titlesGrid.innerHTML += `
+          <div class="bg-hudCard/85 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between gap-2.5">
+            <div>
+              <div class="font-display text-xs font-bold text-arcGold">${t.label}</div>
+              <div class="text-xs text-slate-400 mt-0.5">${t.desc}</div>
+            </div>
+            <button onclick="buyOrEquipTitle('${t.id}')" class="w-full py-1.5 rounded-lg font-display text-xs font-bold uppercase transition ${
+              equipped ? 'bg-arcGold text-obsidian'
+              : owned ? 'bg-obsidian border border-arcGold/50 text-arcGold hover:bg-arcGold/15'
+              : 'bg-arcBlue/20 border border-arcBlue text-cyan-200 hover:bg-arcBlue/40'
+            }">
+              ${equipped ? '✓ Equipped' : owned ? 'Equip Title' : `Unlock • ${t.cost} 💎`}
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    function purchaseEgg(eggId) {
+      const meta = TEN_EGGS.find(e => e.id === eggId);
+      if (!meta) return;
+      if (state.credits < meta.cost) {
+        playSound('alarm');
+        showToast('INSUFFICIENT CREDITS', `Need ${meta.cost} 💎 for ${meta.name}`, 'gold');
+        return;
+      }
+      state.credits -= meta.cost;
+      state.incubatingEggs.push({
+        uid: 'inc_' + Date.now(),
+        eggId: meta.id,
+        progress: 0,
+        required: meta.tasks
+      });
+      saveState();
+      playSound('reward');
+      renderShopTab();
+      showToast('EGG INCUBATING', `${meta.name} placed in hatchery!`, 'gold');
+    }
+
+    function incrementEggProgress(amt = 1) {
+      if (state.incubatingEggs.length === 0) return;
+      const active = state.incubatingEggs[0];
+      active.progress += amt;
+
+      if (active.progress >= active.required) {
+        state.incubatingEggs.shift();
+        const meta = TEN_EGGS.find(e => e.id === active.eggId) || TEN_EGGS[0];
+        const unowned = meta.pool.filter(pid => !state.ownedPets.includes(pid));
+        const pool = unowned.length > 0 ? unowned : meta.pool;
+        const wonPetId = pool[Math.floor(Math.random() * pool.length)];
+
+        if (!state.ownedPets.includes(wonPetId)) state.ownedPets.push(wonPetId);
+        newlyHatchedPetId = wonPetId;
+        const pet = PET_DEX[wonPetId];
+
+        document.getElementById('hatch-pet-emoji').textContent = pet.avatar;
+        document.getElementById('hatch-pet-title').textContent = pet.name;
+        document.getElementById('hatch-pet-rarity').textContent = `${pet.rarity} COMPANION`;
+        document.getElementById('hatch-pet-quote').textContent = `"${pet.quote}"`;
+
+        setTimeout(() => {
+          playSound('hatch');
+          openModal('modal-hatch');
+        }, 420);
+      }
+    }
+
+    function equipNewlyHatchedPet() {
+      if (newlyHatchedPetId) equipCompanionPet(newlyHatchedPetId);
+      closeModal('modal-hatch');
+    }
+
+    function equipCompanionPet(petId) {
+      if (!state.ownedPets.includes(petId)) return;
+      state.equippedPet = petId;
+      saveState();
+      playSound('click');
+      renderShopTab();
+      showToast('COMPANION ACTIVE', `${PET_DEX[petId].name} is now assisting Master Liam.`, 'violet');
+    }
+
+    function buyOrEquipTitle(titleId) {
+      const t = SYSTEM_TITLES.find(item => item.id === titleId);
+      if (!t) return;
+      if (state.ownedTitles.includes(titleId)) {
+        state.equippedTitle = t.label;
+        saveState();
+        playSound('click');
+        renderShopTab();
+        showToast('TITLE EQUIPPED', t.label, 'gold');
+        return;
+      }
+      if (state.credits < t.cost) {
+        playSound('alarm');
+        showToast('INSUFFICIENT CREDITS', `Need ${t.cost} 💎`, 'gold');
+        return;
+      }
+      state.credits -= t.cost;
+      state.ownedTitles.push(titleId);
+      state.equippedTitle = t.label;
+      saveState();
+      playSound('reward');
+      renderShopTab();
+      showToast('TITLE UNLOCKED', t.label, 'gold');
+    }
+
+    // ==================== ARCADE ARENA: TIC-TAC-TOE, SNAKE & PONG ====================
+    function selectArcadeGame(game) {
+      playSound('click');
+      ['ttt', 'snake', 'pong'].forEach(g => {
+        document.getElementById(`arcade-${g}`).classList.add('hidden');
+        document.getElementById(`arcade-${g}`).classList.remove('flex');
+        const btn = document.getElementById(`btn-game-${g}`);
+        btn.classList.remove('bg-arcCyan', 'text-obsidian');
+        btn.classList.add('bg-hudCard', 'border', 'border-arcCyan/40', 'text-arcCyan');
+      });
+
+      const activePanel = document.getElementById(`arcade-${game}`);
+      activePanel.classList.remove('hidden');
+      activePanel.classList.add('flex');
+      const activeBtn = document.getElementById(`btn-game-${game}`);
+      activeBtn.classList.add('bg-arcCyan', 'text-obsidian');
+      activeBtn.classList.remove('bg-hudCard', 'text-arcCyan');
+
+      if (game === 'ttt') initTTT();
+    }
+
+    // --- 1. TIC-TAC-TOE ---
+    let tttCells = Array(9).fill('');
+    let tttOver = false;
+
+    function initTTT() {
+      tttCells = Array(9).fill('');
+      tttOver = false;
+      document.getElementById('ttt-status').textContent = 'Your Turn (X), Master Liam';
+      renderTTT();
+    }
+
+    function renderTTT() {
+      const board = document.getElementById('ttt-board');
+      board.innerHTML = '';
+      tttCells.forEach((val, idx) => {
+        const cell = document.createElement('button');
+        cell.className = `rounded-xl border-2 border-arcCyan/40 bg-hudCard flex items-center justify-center font-display text-3xl sm:text-4xl font-black transition hover:border-arcCyan ${
+          val === 'X' ? 'text-arcCyan' : 'text-arcCrimson'
+        }`;
+        cell.textContent = val;
+        cell.onclick = () => handleTTTMove(idx);
+        board.appendChild(cell);
+      });
+    }
+
+    function checkTTTWinner(b) {
+      const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+      for (const [a,c,d] of lines) {
+        if (b[a] && b[a] === b[c] && b[a] === b[d]) return b[a];
+      }
+      return b.includes('') ? null : 'DRAW';
+    }
+
+    function handleTTTMove(idx) {
+      if (tttOver || tttCells[idx]) return;
+      playSound('click');
+      tttCells[idx] = 'X';
+      renderTTT();
+
+      let res = checkTTTWinner(tttCells);
+      if (res) return endTTT(res);
+
+      // JARVIS smart-ish AI move (70% optimal, 30% playful so Liam can win fairly)
+      setTimeout(() => {
+        if (tttOver) return;
+        const empty = tttCells.map((v, i) => v === '' ? i : null).filter(v => v !== null);
+        if (empty.length === 0) return;
+
+        let move = empty[Math.floor(Math.random() * empty.length)];
+        if (Math.random() < 0.72) {
+          // Check winning or blocking move
+          for (const mark of ['O', 'X']) {
+            for (const i of empty) {
+              const copy = [...tttCells];
+              copy[i] = mark;
+              if (checkTTTWinner(copy) === mark) { move = i; break; }
+            }
+          }
+        }
+        tttCells[move] = 'O';
+        renderTTT();
+        res = checkTTTWinner(tttCells);
+        if (res) endTTT(res);
+      }, 260);
+    }
+
+    function endTTT(winner) {
+      tttOver = true;
+      const statusEl = document.getElementById('ttt-status');
+      if (winner === 'X') {
+        state.credits += 20;
+        saveState();
+        refreshHUD();
+        playSound('reward');
+        statusEl.textContent = 'VICTORY! Master Liam defeated JARVIS (+20 💎)';
+        showToast('ARCADE VICTORY', '+20 Credits 💎 earned!', 'gold');
+      } else if (winner === 'O') {
+        playSound('alarm');
+        statusEl.textContent = 'JARVIS wins this simulation. Rematch?';
+      } else {
+        statusEl.textContent = 'Tactical Stalemate (Draw).';
+      }
+    }
+
+    function resetTTT() {
+      playSound('click');
+      initTTT();
+    }
+
+    // --- 2. CYBER SNAKE ---
+    let snakeLoop = null;
+    let snakeBody = [{ x: 7, y: 7 }];
+    let snakeDir = { x: 1, y: 0 };
+    let snakeFood = { x: 11, y: 7 };
+    let snakeScore = 0;
+
+    function setSnakeDir(dx, dy) {
+      if (snakeDir.x === -dx && snakeDir.y === -dy) return;
+      snakeDir = { x: dx, y: dy };
+    }
+
+    function startSnakeGame() {
+      playSound('click');
+      if (snakeLoop) clearInterval(snakeLoop);
+      snakeBody = [{ x: 7, y: 7 }, { x: 6, y: 7 }];
+      snakeDir = { x: 1, y: 0 };
+      snakeScore = 0;
+      document.getElementById('snake-score').textContent = '0';
+      document.getElementById('snake-next-target').textContent = '5';
+      spawnSnakeFood();
+
+      snakeLoop = setInterval(() => {
+        const head = { x: snakeBody[0].x + snakeDir.x, y: snakeBody[0].y + snakeDir.y };
+        if (head.x < 0 || head.x >= 15 || head.y < 0 || head.y >= 15 || snakeBody.some(s => s.x === head.x && s.y === head.y)) {
+          clearInterval(snakeLoop);
+          snakeLoop = null;
+          playSound('alarm');
+          showToast('SIMULATION ENDED', `Final Snake Score: ${snakeScore}`, 'cyan');
+          return;
+        }
+        snakeBody.unshift(head);
+        if (head.x === snakeFood.x && head.y === snakeFood.y) {
+          snakeScore++;
+          playSound('click');
+          document.getElementById('snake-score').textContent = snakeScore;
+          if (snakeScore % 5 === 0) {
+            state.credits += 25;
+            saveState();
+            refreshHUD();
+            playSound('reward');
+            document.getElementById('snake-next-target').textContent = snakeScore + 5;
+            showToast('SNAKE MILESTONE!', '+25 Credits 💎 awarded!', 'gold');
+          }
+          spawnSnakeFood();
+        } else {
+          snakeBody.pop();
+        }
+        drawSnake();
+      }, 145);
+    }
+
+    function spawnSnakeFood() {
+      snakeFood = { x: Math.floor(Math.random() * 15), y: Math.floor(Math.random() * 15) };
+    }
+
+    function drawSnake() {
+      const c = document.getElementById('snake-canvas');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#02040a';
+      ctx.fillRect(0, 0, 300, 300);
+
+      // Grid lines
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.08)';
+      for (let i = 0; i <= 15; i++) {
+        ctx.beginPath(); ctx.moveTo(i * 20, 0); ctx.lineTo(i * 20, 300); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, i * 20); ctx.lineTo(300, i * 20); ctx.stroke();
+      }
+
+      // Food orb
+      ctx.fillStyle = '#ffd700';
+      ctx.beginPath();
+      ctx.arc(snakeFood.x * 20 + 10, snakeFood.y * 20 + 10, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Snake segments
+      snakeBody.forEach((seg, idx) => {
+        ctx.fillStyle = idx === 0 ? '#00f0ff' : '#0077ff';
+        ctx.fillRect(seg.x * 20 + 2, seg.y * 20 + 2, 16, 16);
+      });
+    }
+
+    window.addEventListener('keydown', e => {
+      if (e.key === 'ArrowUp') setSnakeDir(0, -1);
+      if (e.key === 'ArrowDown') setSnakeDir(0, 1);
+      if (e.key === 'ArrowLeft') setSnakeDir(-1, 0);
+      if (e.key === 'ArrowRight') setSnakeDir(1, 0);
+    });
+
+    // --- 3. NEON PING PONG ---
+    let pongAnim = null;
+    let pongPlayerX = 135;
+    let pongAiX = 135;
+    let pongMoveDir = 0;
+    let pongBall = { x: 170, y: 120, vx: 2.6, vy: 2.8 };
+    let pongScores = { p: 0, ai: 0 };
+
+    function pongMove(dir) { pongMoveDir = dir; }
+
+    function startPongGame() {
+      playSound('click');
+      if (pongAnim) cancelAnimationFrame(pongAnim);
+      pongScores = { p: 0, ai: 0 };
+      document.getElementById('pong-player-score').textContent = '0';
+      document.getElementById('pong-ai-score').textContent = '0';
+      resetPongBall();
+
+      const canvas = document.getElementById('pong-canvas');
+      canvas.onmousemove = e => {
+        const rect = canvas.getBoundingClientRect();
+        pongPlayerX = Math.max(0, Math.min(270, e.clientX - rect.left - 35));
+      };
+      canvas.ontouchmove = e => {
+        const rect = canvas.getBoundingClientRect();
+        pongPlayerX = Math.max(0, Math.min(270, e.touches[0].clientX - rect.left - 35));
+      };
+
+      function step() {
+        pongPlayerX = Math.max(0, Math.min(270, pongPlayerX + pongMoveDir * 5));
+        // AI paddle tracks ball with slight delay
+        const aiCenter = pongAiX + 35;
+        if (aiCenter < pongBall.x - 8) pongAiX = Math.min(270, pongAiX + 2.5);
+        else if (aiCenter > pongBall.x + 8) pongAiX = Math.max(0, pongAiX - 2.5);
+
+        pongBall.x += pongBall.vx;
+        pongBall.y += pongBall.vy;
+
+        if (pongBall.x <= 6 || pongBall.x >= 334) pongBall.vx *= -1;
+
+        // Player bottom paddle (y = 224)
+        if (pongBall.y >= 218 && pongBall.x >= pongPlayerX && pongBall.x <= pongPlayerX + 70) {
+          pongBall.vy = -Math.abs(pongBall.vy) * 1.03;
+          playSound('click');
+        }
+        // AI top paddle (y = 16)
+        if (pongBall.y <= 22 && pongBall.x >= pongAiX && pongBall.x <= pongAiX + 70) {
+          pongBall.vy = Math.abs(pongBall.vy);
+          playSound('click');
+        }
+
+        if (pongBall.y < 0) {
+          pongScores.p++;
+          document.getElementById('pong-player-score').textContent = pongScores.p;
+          if (pongScores.p >= 5) {
+            state.credits += 30;
+            saveState();
+            refreshHUD();
+            playSound('reward');
+            showToast('PONG CHAMPION!', '+30 Credits 💎 earned!', 'gold');
+            return;
+          }
+          resetPongBall();
+        } else if (pongBall.y > 240) {
+          pongScores.ai++;
+          document.getElementById('pong-ai-score').textContent = pongScores.ai;
+          if (pongScores.ai >= 5) {
+            playSound('alarm');
+            showToast('JARVIS WINS PONG', 'Hit Start to challenge again, Master Liam!', 'cyan');
+            return;
+          }
+          resetPongBall();
+        }
+
+        drawPong();
+        pongAnim = requestAnimationFrame(step);
+      }
+      pongAnim = requestAnimationFrame(step);
+    }
+
+    function resetPongBall() {
+      pongBall = {
+        x: 170,
+        y: 120,
+        vx: (Math.random() > 0.5 ? 1 : -1) * 2.5,
+        vy: (Math.random() > 0.5 ? 1 : -1) * 2.7
+      };
+    }
+
+    function drawPong() {
+      const c = document.getElementById('pong-canvas');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#02040a';
+      ctx.fillRect(0, 0, 340, 240);
+
+      // Center line
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath(); ctx.moveTo(0, 120); ctx.lineTo(340, 120); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // AI Paddle
+      ctx.fillStyle = '#ff2a5f';
+      ctx.fillRect(pongAiX, 10, 70, 8);
+
+      // Player Paddle
+      ctx.fillStyle = '#00f0ff';
+      ctx.fillRect(pongPlayerX, 222, 70, 8);
+
+      // Ball
+      ctx.fillStyle = '#ffd700';
+      ctx.beginPath(); ctx.arc(pongBall.x, pongBall.y, 6, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // ==================== PROCEDURAL NEON NIGHT CITY RENDERER ====================
+    const cityBuildings = Array.from({ length: 28 }, (_, i) => ({
+      x: i * 52,
+      w: 36 + (i % 3) * 14,
+      h: 130 + ((i * 47) % 210),
+      color: i % 3 === 0 ? '#00f0ff' : i % 3 === 1 ? '#a855f7' : '#ff2a5f',
+      sign: i === 4 ? 'LOZZINHO' : i === 10 ? 'JARVIS OS' : i === 16 ? 'LOCCA LOCOO' : null
+    }));
+
+    const rainDrops = Array.from({ length: 85 }, () => ({
+      x: Math.random() * 1400,
+      y: Math.random() * 800,
+      len: 10 + Math.random() * 16,
+      speed: 5 + Math.random() * 6
+    }));
+
+    const hoverCars = Array.from({ length: 7 }, (_, i) => ({
+      x: Math.random() * 1200,
+      y: 90 + i * 38,
+      speed: (i % 2 === 0 ? 1 : -1) * (1.8 + Math.random() * 2.2),
+      color: i % 2 === 0 ? '#00f0ff' : '#ffd700'
+    }));
+
+    function renderNeonCityFrame(canvas) {
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      // Night sky gradient
+      const sky = ctx.createLinearGradient(0, 0, 0, h);
+      sky.addColorStop(0, '#02040a');
+      sky.addColorStop(0.55, '#090d24');
+      sky.addColorStop(1, '#140b2e');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, w, h);
+
+      // Glowing Cyber Moon
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.14)';
+      ctx.beginPath(); ctx.arc(w * 0.78, h * 0.22, 46, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#e0f7ff';
+      ctx.beginPath(); ctx.arc(w * 0.78, h * 0.22, 26, 0, Math.PI * 2); ctx.fill();
+
+      // Skyscrapers
+      cityBuildings.forEach((b, idx) => {
+        const bx = (b.x % (w + 100));
+        const by = h - b.h;
+        ctx.fillStyle = '#050814';
+        ctx.fillRect(bx, by, b.w, b.h);
+        ctx.strokeStyle = b.color;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(bx, by, b.w, b.h);
+
+        // Lit windows
+        ctx.fillStyle = b.color;
+        for (let wy = by + 12; wy < h - 15; wy += 16) {
+          for (let wx = bx + 6; wx < bx + b.w - 8; wx += 10) {
+            if ((wx + wy + idx) % 3 === 0) {
+              ctx.globalAlpha = 0.55;
+              ctx.fillRect(wx, wy, 4, 7);
+            }
+          }
+        }
+        ctx.globalAlpha = 1;
+
+        // Neon Holosigns
+        if (b.sign && bx < w - 60) {
+          ctx.fillStyle = 'rgba(2, 4, 10, 0.85)';
+          ctx.fillRect(bx - 4, by + 26, b.w + 18, 16);
+          ctx.strokeStyle = b.color;
+          ctx.strokeRect(bx - 4, by + 26, b.w + 18, 16);
+          ctx.fillStyle = b.color;
+          ctx.font = 'bold 9px monospace';
+          ctx.fillText(b.sign, bx, by + 37);
+        }
+      });
+
+      // Hover Cars
+      hoverCars.forEach(car => {
+        car.x += car.speed;
+        if (car.x > w + 40) car.x = -40;
+        if (car.x < -40) car.x = w + 40;
+        ctx.fillStyle = car.color;
+        ctx.fillRect(car.x, car.y, 18, 4);
+      });
+
+      // Rain Streaks
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.28)';
+      ctx.lineWidth = 1;
+      rainDrops.forEach(r => {
+        r.y += r.speed;
+        r.x -= 1.2;
+        if (r.y > h) { r.y = -20; r.x = Math.random() * w; }
+        ctx.beginPath();
+        ctx.moveTo(r.x, r.y);
+        ctx.lineTo(r.x - 3, r.y + r.len);
+        ctx.stroke();
+      });
+    }
+
+    function resizeShowcaseCity() {
+      const sc = document.getElementById('showcase-city-canvas');
+      if (sc) {
+        sc.width = sc.clientWidth || 600;
+        sc.height = sc.clientHeight || 380;
+      }
+    }
+
+    function startCityAnimationLoop() {
+      const amb = document.getElementById('ambient-city-canvas');
+      const show = document.getElementById('showcase-city-canvas');
+      function syncSizes() {
+        amb.width = window.innerWidth;
+        amb.height = window.innerHeight;
+        if (show && !document.getElementById('tab-city').classList.contains('hidden')) {
+          show.width = show.clientWidth;
+          show.height = show.clientHeight;
+        }
+      }
+      syncSizes();
+      window.addEventListener('resize', syncSizes);
+
+      function loop() {
+        if (state.ambientCity) renderNeonCityFrame(amb);
+        if (!document.getElementById('tab-city').classList.contains('hidden')) {
+          renderNeonCityFrame(show);
+        }
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+    }
+
+    // ==================== MODAL & ESCAPE HELPERS ====================
+    function openModal(id) {
+      const el = document.getElementById(id);
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+    }
+    function closeModal(id) {
+      playSound('click');
+      const el = document.getElementById(id);
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+    }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+
+    // ==================== BOOT SEQUENCE ====================
+    window.addEventListener('DOMContentLoaded', () => {
+      tickClock();
+      setInterval(tickClock, 1000);
+      refreshHUD();
+      renderHabitCalendar();
+      renderQuestChecklist();
+      renderPools();
+      renderEventCalendar();
+      renderSpecialEventsList();
+      renderJarvisChat();
+      renderShopTab();
+      initTTT();
+      drawSnake();
+      drawPong();
+      startCityAnimationLoop();
+    });
+  </script>
+</body>
+</html>
